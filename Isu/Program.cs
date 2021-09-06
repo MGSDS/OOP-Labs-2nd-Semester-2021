@@ -1,4 +1,6 @@
-﻿namespace Isu
+﻿using Isu.Services;
+
+namespace Isu
 {
     internal class Program
     {
