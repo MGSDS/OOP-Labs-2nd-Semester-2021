@@ -1,18 +1,22 @@
+using Isu.Entities;
 using Isu.Tools;
 
 namespace Isu.DataTypes
 {
     public class CourseNumber
     {
-        public CourseNumber(int courseNum)
+        public CourseNumber(int courseNumber)
         {
-            if (courseNum > 4 || courseNum < 1)
+            if (courseNumber > 4 || courseNumber < 1)
             {
                 throw new IsuException("Invalid CourseNum");
             }
 
-            Course = courseNum;
+            Course = courseNumber;
         }
+
+        public CourseNumber(string groupName)
+            : this(int.Parse(groupName.Substring(2, 1))) { }
 
         public int Course { get; private set; }
 

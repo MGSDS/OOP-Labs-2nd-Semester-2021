@@ -10,6 +10,7 @@ namespace Isu.Entities
     public class Group
     {
         private readonly uint _maxCapacity;
+
         public Group(string name, uint maxCapacity)
         {
             if (name.Substring(0, 2) != "M3")
@@ -18,7 +19,7 @@ namespace Isu.Entities
             }
 
             _maxCapacity = maxCapacity;
-            Course = new CourseNumber(int.Parse(name.Substring(2, 1)));
+            Course = new CourseNumber(name);
             Name = name;
             Students = new List<Student>();
         }
@@ -30,10 +31,8 @@ namespace Isu.Entities
         public void RemoveStudent(ulong studentId)
         {
             Student? found = Students.Find(st => st.Id == studentId);
-            if (found == null)
-                return;
-            found.StudyGroup.Students.Remove(found);
-            Students.Remove(found);
+            if (found != null)
+                Students.Remove(found);
         }
 
         public void AddStudent(Student student)

@@ -6,9 +6,6 @@ namespace Isu
     {
         private static void Main()
         {
-            var isu = new IsuService(5);
-            isu.AddGroup("M3200");
-            var a = isu.FindStudent("fuck");
         }
     }
 }

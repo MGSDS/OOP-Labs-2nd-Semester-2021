@@ -11,6 +11,7 @@ namespace Isu.Services
     public class IsuService : IIsuService
     {
         private uint _maxGroupCapacity;
+
         public IsuService(uint maxGroupCapacity)
         {
             _maxGroupCapacity = maxGroupCapacity;
