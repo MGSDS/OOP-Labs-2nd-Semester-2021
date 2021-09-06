@@ -6,7 +6,7 @@ namespace Isu.DataTypes
     {
         public CourseNumber(int courseNum)
         {
-            if (courseNum is > 4 or < 1)
+            if (courseNum > 4 || courseNum < 1)
             {
                 throw new IsuException("Invalid CourseNum");
             }
