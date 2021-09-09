@@ -46,7 +46,7 @@ namespace Shops.Services
         {
             Shop localShop = GetShopFromShops(shop);
             if (!localShop.Products.Contains(product))
-                throw new Exception("There is no such product");
+                throw new ShopServiceException("There is no such product");
             localShop.Products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) !.Cost = newPrice;
         }
 
@@ -62,7 +62,7 @@ namespace Shops.Services
         public void Buy(Buyer buyer, Shop shop, Product product)
         {
             if (!Catalog.Contains(product))
-                throw new Exception("There is no such product");
+                throw new ShopServiceException("There is no such product");
             GetShopFromShops(shop).Sell(buyer, product);
         }
 
