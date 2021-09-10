@@ -5,14 +5,14 @@ namespace Shops.Entities
         public SellableProduct(string name, uint price, uint count)
             : base(name, count)
         {
-            Cost = price;
+            Price = price;
         }
 
-        public uint Cost { get; set; }
+        public uint Price { get; set; }
 
         public override object Clone()
         {
-            return new SellableProduct(Name, Cost, Count);
+            return new SellableProduct(Name, Price, Count);
         }
     }
 }

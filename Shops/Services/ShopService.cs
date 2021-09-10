@@ -31,37 +31,40 @@ namespace Shops.Services
 
         public Shop RegisterShop(string shopName, string address)
         {
-            _shops.Add(new Shop(_maxId, shopName, address));
-            return Shops.FirstOrDefault(shop => shop.Id == _maxId) !;
+            _shops.Add(new Shop(_maxId++, shopName, address));
+            return Shops.FirstOrDefault(shop => shop.Id == _maxId - 1) !;
         }
 
-        public void AddProduct(Shop shop, SellableProduct product)
+        public Product AddProduct(Shop shop, SellableProduct product)
         {
-            if (!Catalog.Contains(product))
-                throw new ShopServiceException("There is no such product");
+            if (Catalog.All(catalogProduct => catalogProduct.Name != product.Name))
+                throw new ShopServiceException("There is no such product registered");
             _deliveryAgent.DeliverProductToShop(GetShopFromShops(shop), product);
+            return GetShopFromShops(shop).Products.FirstOrDefault(localProduct => localProduct.Name == product.Name) !;
         }
 
-        public void ChangePrice(Shop shop, SellableProduct product, uint newPrice)
+        public void ChangePrice(Shop shop, IProduct product, uint newPrice)
         {
             Shop localShop = GetShopFromShops(shop);
-            if (!localShop.Products.Contains(product))
+            if (localShop.Products.All(localProduct => product.Name != localProduct.Name))
                 throw new ShopServiceException("There is no such product");
-            localShop.Products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) !.Cost = newPrice;
+            localShop.Products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) !.Price = newPrice;
         }
 
-        public uint FindCheapestPrice(string productName, uint count)
+        public Shop FindCheapestPrice(Product product)
         {
-            if (Catalog.All(product => product.Name != productName))
-                throw new Exception("There is no such product");
-            List<Shop> found = Shops.Where(shop => shop.CheckAvailability(new Product(productName, count)))
-                .OrderBy(shop => shop.Products.FirstOrDefault(product => product.Name == productName) !.Cost).ToList();
-            return found[0].Id;
+            if (Catalog.All(localProduct => product.Name != localProduct.Name))
+                throw new ShopServiceException("There is no such product");
+            List<Shop> found = Shops.Where(shop => shop.CheckAvailability(product))
+                .OrderBy(shop => shop.Products.FirstOrDefault(localProduct => product.Name == localProduct.Name) !.Price).ToList();
+            if (!found.Any())
+                throw new ShopServiceException("There is no not enough product in any shop");
+            return found[0];
         }
 
         public void Buy(Buyer buyer, Shop shop, Product product)
         {
-            if (!Catalog.Contains(product))
+            if (Catalog.All(localProduct => product.Name != localProduct.Name))
                 throw new ShopServiceException("There is no such product");
             GetShopFromShops(shop).Sell(buyer, product);
         }

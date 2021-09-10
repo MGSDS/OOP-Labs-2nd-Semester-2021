@@ -24,7 +24,7 @@ namespace Shops.Entities
 
         public void DeliverProductToShop(Shop shop, SellableProduct product)
         {
-            if (!_catalog.Contains(product))
+            if (_catalog.All(catalogProduct => catalogProduct.Name != product.Name))
                 throw new Exception("Product is not registered");
             shop.GiveProduct((SellableProduct)product.Clone());
         }

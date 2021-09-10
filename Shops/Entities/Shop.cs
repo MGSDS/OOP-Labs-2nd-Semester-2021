@@ -33,10 +33,10 @@ namespace Shops.Entities
         {
             SellableProduct found = _products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) ??
                                      throw new ShopServiceException("There is no products in this shop");
-            if (found.Count <= product.Count)
+            if (found.Count < product.Count)
                 throw new ShopServiceException("There is no enough products in this shop");
 
-            buyer.GiveProduct(new Product(product.Name, product.Count), product.Count * found.Cost);
+            buyer.GiveProduct(new Product(product.Name, product.Count), product.Count * found.Price);
 
             found.Count -= product.Count;
             if (found.Count == 0)
@@ -47,7 +47,7 @@ namespace Shops.Entities
         {
             SellableProduct found = _products.FirstOrDefault(shopProduct => shopProduct.Name == productName) ??
                                     throw new ShopServiceException("There is no such product");
-            found.Cost = newPrice;
+            found.Price = newPrice;
         }
 
         public void GiveProduct(SellableProduct product)
