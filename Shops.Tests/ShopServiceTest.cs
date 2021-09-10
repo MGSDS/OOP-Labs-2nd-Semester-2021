@@ -132,7 +132,6 @@ namespace Shops.Tests
         {
             const string productName = "TestProduct";
             const string shopName = "TestShop";
-            const uint price = 1;
             const uint count = 100;
             const uint money = 10000;
             var buyer = new Buyer(money);
@@ -140,7 +139,7 @@ namespace Shops.Tests
             _shopService.RegisterProduct(productName);
             Assert.Catch<ShopServiceException>(() =>
             {
-                _shopService.Buy(buyer, shop, new Product(productName, 100));
+                _shopService.Buy(buyer, shop, new Product(productName, count));
             });
 
         }
