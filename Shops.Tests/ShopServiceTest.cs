@@ -24,11 +24,11 @@ namespace Shops.Tests
             const string shopName = "TestShop";
             const uint price = 10;
             const uint count = 100;
-            Shop shop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
-            _shopService.AddProduct(shop, new SellableProduct(productName, price, count));
-            _shopService.AddProduct(shop, new SellableProduct(productName, price, count));
-            Assert.AreEqual(count*2, _shopService.Shops.FirstOrDefault(listedShop => listedShop.Id == shop.Id)
+            _shopService.AddProduct(shopId, productName, count, price);
+            _shopService.AddProduct(shopId, productName, count, price); 
+            Assert.AreEqual(count*2, _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id)
                 .Products.FirstOrDefault(product => product.Name == productName).Count);
         }
         
@@ -40,12 +40,11 @@ namespace Shops.Tests
             const uint price = 10;
             const uint newPrice = 100;
             const uint count = 100;
-            Shop shop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
-            var product = new SellableProduct(productName, price, count);
-            _shopService.AddProduct(shop, product);
-            _shopService.ChangePrice(shop, product, newPrice);
-            Assert.AreEqual(newPrice, _shopService.Shops.FirstOrDefault(listedShop => listedShop.Id == shop.Id)
+            _shopService.AddProduct(shopId, productName, count, price);
+            _shopService.ChangePrice(shopId, productName, newPrice);
+            Assert.AreEqual(newPrice, _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id)
                 .Products.FirstOrDefault(listedProduct => listedProduct.Name == productName).Price);
         }
         
@@ -57,15 +56,15 @@ namespace Shops.Tests
             const uint lowestPrice = 10;
             const uint maxPrice = 100;
             const uint count = 100;
-            Shop cheapestShop = _shopService.RegisterShop(shopName, "TestAddress");
-            Shop expensiveShop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint cheapestShopId = _shopService.RegisterShop(shopName, "TestAddress");
+            uint expensiveShopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
-            var cheapestProduct = new SellableProduct(productName, lowestPrice, count);
-            var expensiveProduct = new SellableProduct(productName, maxPrice, count);
-            _shopService.AddProduct(expensiveShop, expensiveProduct);
-            _shopService.AddProduct(cheapestShop, cheapestProduct);
-            Shop found = _shopService.FindCheapestPrice(new Product(productName, count));
-            Assert.AreEqual(lowestPrice, found.Products.FirstOrDefault(product => product.Name == productName).Price);
+            _shopService.AddProduct(cheapestShopId, productName, count, lowestPrice);
+            _shopService.AddProduct(expensiveShopId, productName, count, maxPrice);
+            uint found = _shopService.FindCheapestPriceShopId(productName, count);
+            Assert.AreEqual(lowestPrice,
+                _shopService.Shops.FirstOrDefault(shop => shop.Id == found).Products
+                    .FirstOrDefault(product => product.Name == productName).Price);
         }
         
         [Test]
@@ -77,14 +76,15 @@ namespace Shops.Tests
             const uint count = 100;
             const uint money = 1000000;
             var buyer = new Buyer(money);
-            Shop shop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
+            Shop shop = _shopService.Shops.FirstOrDefault(localShop => localShop.Id == shopId);
             _shopService.RegisterProduct(productName);
-            Product product = _shopService.AddProduct(shop, new SellableProduct(productName, price, count));
-            _shopService.Buy(buyer, shop, new Product(productName, count / 2));
+            _shopService.AddProduct(shopId, productName, count, price);
+            _shopService.Buy(buyer, shopId, productName, count / 2);
             Assert.AreEqual(money - count / 2 * price, buyer.Money);
             Assert.AreEqual(count / 2, shop.Products[0].Count);
             Assert.AreEqual(count / 2, buyer.Products[0].Count);
-            _shopService.Buy(buyer, shop, new Product(productName, count / 2));
+            _shopService.Buy(buyer, shopId, productName, count / 2);
             Assert.AreEqual(money - count * price, buyer.Money);
             Assert.AreEqual(false, shop.Products.Any());
             Assert.AreEqual(count, buyer.Products[0].Count);
@@ -99,12 +99,12 @@ namespace Shops.Tests
             const uint count = 100;
             const uint money = 0;
             var buyer = new Buyer(money);
-            Shop shop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
-            Product product = _shopService.AddProduct(shop, new SellableProduct(productName, price, count));
+            _shopService.AddProduct(shopId, productName, price, count);
             Assert.Catch<ShopServiceException>(() =>
             {
-                _shopService.Buy(buyer, shop, new Product(productName, count));
+                _shopService.Buy(buyer, shopId, productName, count);
             });
 
         }
@@ -118,12 +118,12 @@ namespace Shops.Tests
             const uint count = 100;
             const uint money = 10000;
             var buyer = new Buyer(money);
-            Shop shop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
-            Product product = _shopService.AddProduct(shop, new SellableProduct(productName, price, count));
+            _shopService.AddProduct(shopId, productName, price, count);
             Assert.Catch<ShopServiceException>(() =>
             {
-                _shopService.Buy(buyer, shop, new Product(productName, count + 1));
+                _shopService.Buy(buyer, shopId, productName, count + 1);
             });
         }
         
@@ -135,11 +135,11 @@ namespace Shops.Tests
             const uint count = 100;
             const uint money = 10000;
             var buyer = new Buyer(money);
-            Shop shop = _shopService.RegisterShop(shopName, "TestAddress");
+            uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
             Assert.Catch<ShopServiceException>(() =>
             {
-                _shopService.Buy(buyer, shop, new Product(productName, count));
+                _shopService.Buy(buyer, shopId, productName, count);
             });
 
         }

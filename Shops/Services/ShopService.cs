@@ -1,5 +1,4 @@
 #nullable enable
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Shops.Entities;
@@ -29,51 +28,57 @@ namespace Shops.Services
             return Catalog.FirstOrDefault(product => product.Name == productName) !;
         }
 
-        public Shop RegisterShop(string shopName, string address)
+        public uint RegisterShop(string shopName, string address)
         {
             _shops.Add(new Shop(_maxId++, shopName, address));
-            return Shops.FirstOrDefault(shop => shop.Id == _maxId - 1) !;
+            return _maxId - 1;
         }
 
-        public Product AddProduct(Shop shop, SellableProduct product)
+        public void AddProduct(uint shopId, string productName, uint count, uint price)
         {
-            if (Catalog.All(catalogProduct => catalogProduct.Name != product.Name))
-                throw new ShopServiceException("There is no such product registered");
-            _deliveryAgent.DeliverProductToShop(GetShopFromShops(shop), product);
-            return GetShopFromShops(shop).Products.FirstOrDefault(localProduct => localProduct.Name == product.Name) !;
+            CheckProductRegistration(productName);
+            _deliveryAgent.DeliverProductToShop(GetShopById(shopId), new SellableProduct(productName, price, count));
         }
 
-        public void ChangePrice(Shop shop, IProduct product, uint newPrice)
+        public void ChangePrice(uint shopId, string productName, uint newPrice)
         {
-            Shop localShop = GetShopFromShops(shop);
-            if (localShop.Products.All(localProduct => product.Name != localProduct.Name))
-                throw new ShopServiceException("There is no such product");
-            localShop.Products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) !.Price = newPrice;
+            Shop shop = GetShopById(shopId);
+            CheckProductRegistration(productName);
+            shop.Products.FirstOrDefault(product => product.Name == productName) !.Price = newPrice;
         }
 
-        public Shop FindCheapestPrice(Product product)
+        public uint FindCheapestPriceShopId(string productName, uint count)
         {
-            if (Catalog.All(localProduct => product.Name != localProduct.Name))
-                throw new ShopServiceException("There is no such product");
-            List<Shop> found = Shops.Where(shop => shop.CheckAvailability(product))
-                .OrderBy(shop => shop.Products.FirstOrDefault(localProduct => product.Name == localProduct.Name) !.Price).ToList();
+            CheckProductRegistration(productName);
+            List<Shop> found = Shops.Where(shop => shop.CheckAvailability(productName, count))
+                .OrderBy(shop => shop.Products.FirstOrDefault(product => product.Name == productName) !.Price).ToList();
             if (!found.Any())
                 throw new ShopServiceException("There is no not enough product in any shop");
-            return found[0];
+            return found[0].Id;
         }
 
-        public void Buy(Buyer buyer, Shop shop, Product product)
+        public void Buy(Buyer buyer, uint shopId, string productName, uint count)
         {
-            if (Catalog.All(localProduct => product.Name != localProduct.Name))
-                throw new ShopServiceException("There is no such product");
-            GetShopFromShops(shop).Sell(buyer, product);
+            CheckProductRegistration(productName);
+            GetShopById(shopId).Sell(buyer, productName, count);
         }
 
-        private Shop GetShopFromShops(Shop shop)
+        private Shop GetShopById(uint shopId)
         {
-            if (!_shops.Contains(shop))
-                throw new ShopServiceException("There is no such shop");
-            return _shops.FirstOrDefault(listedShop => listedShop.Id == shop.Id) !;
+            CheckShopRegistration(shopId);
+            return _shops.FirstOrDefault(listedShop => listedShop.Id == shopId) !;
+        }
+
+        private void CheckProductRegistration(string productName)
+        {
+            if (Catalog.All(product => product.Name != productName))
+                throw new ShopServiceException("There is no such product registered");
+        }
+
+        private void CheckShopRegistration(uint shopId)
+        {
+            if (Shops.All(shop => shop.Id != shopId))
+                throw new ShopServiceException("There is no such shop registered");
         }
     }
 }

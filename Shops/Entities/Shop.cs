@@ -23,22 +23,22 @@ namespace Shops.Entities
         public string Address { get; }
         public IReadOnlyList<SellableProduct> Products => _products;
 
-        public bool CheckAvailability(Product product)
+        public bool CheckAvailability(string productName, uint count)
         {
-            SellableProduct? found = _products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name);
-            return found != null && found.Count >= product.Count;
+            SellableProduct? found = _products.FirstOrDefault(product => product.Name == productName);
+            return found != null && found.Count >= count;
         }
 
-        public void Sell(Buyer buyer, Product product)
+        public void Sell(Buyer buyer, string productName, uint count)
         {
-            SellableProduct found = _products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) ??
+            SellableProduct found = _products.FirstOrDefault(product => productName == product.Name) ??
                                      throw new ShopServiceException("There is no products in this shop");
-            if (found.Count < product.Count)
+            if (found.Count < count)
                 throw new ShopServiceException("There is no enough products in this shop");
 
-            buyer.GiveProduct(new Product(product.Name, product.Count), product.Count * found.Price);
+            buyer.GiveProduct(new Product(productName, count), count * found.Price);
 
-            found.Count -= product.Count;
+            found.Count -= count;
             if (found.Count == 0)
                 _products.Remove(found);
         }
