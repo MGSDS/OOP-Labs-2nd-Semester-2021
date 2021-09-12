@@ -17,7 +17,7 @@ namespace Shops.Entities
             Money = money;
         }
 
-        public uint Money { get; private set; }
+        public uint Money { get; set; }
         public IReadOnlyList<Product> Products => _products;
 
         public void GiveProduct(Product product, uint cost)

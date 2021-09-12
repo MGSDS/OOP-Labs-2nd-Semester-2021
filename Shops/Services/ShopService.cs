@@ -63,6 +63,11 @@ namespace Shops.Services
             GetShopById(shopId).Sell(buyer, productName, count);
         }
 
+        public IReadOnlyList<SellableProduct> GetShopProducts(uint shopId)
+        {
+            return GetShopById(shopId).Products;
+        }
+
         private Shop GetShopById(uint shopId)
         {
             CheckShopRegistration(shopId);
