@@ -1,13 +1,17 @@
+using System;
+
 namespace Shops.Entities
 {
-    public class CatalogProduct : IProduct
+    public class CatalogProduct : ICloneable
     {
         public CatalogProduct(string name)
         {
             Name = name;
         }
 
-        public override object Clone()
+        public string Name { get; }
+
+        public virtual object Clone()
         {
             return new CatalogProduct(Name);
         }
