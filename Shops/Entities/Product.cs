@@ -1,18 +1,14 @@
+using System;
+
 namespace Shops.Entities
 {
-    public class Product : CatalogProduct
+    public class Product
     {
-        public Product(string name, uint count)
-            : base(name)
+        public Product(string name)
         {
-            Count = count;
+            Name = name;
         }
 
-        public uint Count { get; set; }
-
-        public override object Clone()
-        {
-            return new Product(Name, Count);
-        }
+        public string Name { get; }
     }
 }

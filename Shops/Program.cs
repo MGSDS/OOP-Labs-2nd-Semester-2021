@@ -8,8 +8,6 @@ namespace Shops
     {
         public static void Main()
         {
-            var ui = new Ui(new ShopService(), new Buyer(1000));
-            ui.Run();
         }
     }
 }

@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Shops.Tools;
 
 namespace Shops.Entities
@@ -22,42 +23,41 @@ namespace Shops.Entities
         public string Address { get; }
         public IReadOnlyList<SellableProduct> Products => _products;
 
-        public bool CheckAvailability(string productName, uint count)
+        public bool CheckAvailability(Product product, uint count)
         {
-            SellableProduct? found = _products.FirstOrDefault(product => product.Name == productName);
-            return found != null && found.Count >= count;
+            SellableProduct? found = _products.Find(shopProduct => shopProduct.CountableProduct.Product.Equals(product));
+            return found != null && found.CountableProduct.Count >= count;
         }
 
-        public void Sell(Buyer buyer, string productName, uint count)
+        public void Sell(Buyer buyer, Product product, uint count)
         {
-            SellableProduct found = _products.FirstOrDefault(product => productName == product.Name) ??
+            SellableProduct found = _products.Find(shopProduct => shopProduct.CountableProduct.Product.Equals(product)) ??
                                      throw new ShopServiceException("There is no products in this shop");
-            if (found.Count < count)
+            if (found.CountableProduct.Count < count)
                 throw new ShopServiceException("There is no enough products in this shop");
 
-            buyer.GiveProduct(new Product(productName, count), count * found.Price);
+            buyer.GiveProduct(new CountableProduct(product, count), count * found.Price);
 
-            found.Count -= count;
-            if (found.Count == 0)
-                _products.Remove(found);
+            found.CountableProduct.Count -= count;
         }
 
-        public void ChangePrice(string productName, uint newPrice)
+        public void ChangePrice(Product product, uint newPrice)
         {
-            SellableProduct found = _products.FirstOrDefault(shopProduct => shopProduct.Name == productName) ??
-                                    throw new ShopServiceException("There is no such product");
+            SellableProduct found = _products.FirstOrDefault(shopProduct => shopProduct.CountableProduct.Product.Equals(product)) ??
+                                    throw new ShopServiceException("There is no such product in the shop");
             found.Price = newPrice;
         }
 
         public void GiveProduct(SellableProduct product)
         {
-            if (_products.All(shopProduct => shopProduct.Name != product.Name))
+            SellableProduct? localProduct = _products.Find(shopProduct => shopProduct.CountableProduct.Product.Equals(product.CountableProduct.Product));
+            if (localProduct is null)
             {
-                _products.Add((SellableProduct)product.Clone());
+                _products.Add(product);
                 return;
             }
 
-            _products.FirstOrDefault(shopProduct => shopProduct.Name == product.Name) !.Count += product.Count;
+            localProduct.CountableProduct.Count += product.CountableProduct.Count;
         }
     }
 }

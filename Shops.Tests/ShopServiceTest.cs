@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using Shops.Entities;
@@ -27,9 +28,10 @@ namespace Shops.Tests
             uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
             _shopService.AddProduct(shopId, productName, count, price);
-            _shopService.AddProduct(shopId, productName, count, price); 
-            Assert.AreEqual(count*2, _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id)
-                .Products.FirstOrDefault(product => product.Name == productName).Count);
+            _shopService.AddProduct(shopId, productName, count, price);
+            Assert.AreEqual(count * 2,
+                _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products
+                    .First(product => product.CountableProduct.Product.Name == productName).CountableProduct.Count);
         }
         
         [Test]
@@ -44,8 +46,9 @@ namespace Shops.Tests
             _shopService.RegisterProduct(productName);
             _shopService.AddProduct(shopId, productName, count, price);
             _shopService.ChangePrice(shopId, productName, newPrice);
-            Assert.AreEqual(newPrice, _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id)
-                .Products.FirstOrDefault(listedProduct => listedProduct.Name == productName).Price);
+            Assert.AreEqual(newPrice,
+                _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products
+                    .First(product => product.CountableProduct.Product.Name == productName).Price);
         }
         
         [Test]
@@ -63,8 +66,8 @@ namespace Shops.Tests
             _shopService.AddProduct(expensiveShopId, productName, count, maxPrice);
             uint found = _shopService.FindCheapestPriceShopId(productName, count);
             Assert.AreEqual(lowestPrice,
-                _shopService.Shops.FirstOrDefault(shop => shop.Id == found).Products
-                    .FirstOrDefault(product => product.Name == productName).Price);
+                _shopService.Shops.FirstOrDefault(shop => found == shop.Id).Products
+                    .First(product => product.CountableProduct.Product.Name == productName).Price);
         }
         
         [Test]
@@ -82,11 +85,11 @@ namespace Shops.Tests
             _shopService.AddProduct(shopId, productName, count, price);
             _shopService.Buy(buyer, shopId, productName, count / 2);
             Assert.AreEqual(money - count / 2 * price, buyer.Money);
-            Assert.AreEqual(count / 2, shop.Products[0].Count);
+            Assert.AreEqual(count / 2, shop.Products[0].CountableProduct.Count);
             Assert.AreEqual(count / 2, buyer.Products[0].Count);
             _shopService.Buy(buyer, shopId, productName, count / 2);
             Assert.AreEqual(money - count * price, buyer.Money);
-            Assert.AreEqual(false, shop.Products.Any());
+            Assert.AreEqual(0, shop.Products[0].CountableProduct.Count);
             Assert.AreEqual(count, buyer.Products[0].Count);
         }
         

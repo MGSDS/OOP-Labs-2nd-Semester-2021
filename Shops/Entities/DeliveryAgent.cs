@@ -1,6 +1,8 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Shops.Entities
 {
@@ -15,18 +17,36 @@ namespace Shops.Entities
 
         public IReadOnlyList<CatalogProduct> Catalog => _catalog;
 
-        public CatalogProduct RegisterProduct(string productName)
+        public void RegisterProduct(string productName)
         {
-            if (_catalog.All(catalogProduct => catalogProduct.Name != productName))
-                _catalog.Add(new CatalogProduct(productName));
-            return _catalog.FirstOrDefault(product => product.Name == productName);
+            CatalogProduct? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Product.Name == productName);
+            if (catalogProduct is null)
+                _catalog.Add(new CatalogProduct(new Product(productName)));
         }
 
         public void DeliverProductToShop(Shop shop, SellableProduct product)
         {
-            if (_catalog.All(catalogProduct => catalogProduct.Name != product.Name))
+            CatalogProduct? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Product == product.CountableProduct.Product);
+            if (catalogProduct is null)
                 throw new Exception("Product is not registered");
             shop.GiveProduct((SellableProduct)product.Clone());
+            catalogProduct.Shops.Add(shop);
+        }
+
+        public Product GetProduct(string productName)
+        {
+            CatalogProduct? product = _catalog.Find(product => product.Product.Name == productName);
+            if (product is null)
+                throw new Exception("Product is not registered");
+            return product.Product;
+        }
+
+        public IReadOnlyList<Shop> GetShops(Product product)
+        {
+            CatalogProduct? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Product.Equals(product));
+            if (product is null)
+                throw new Exception("Product is not registered");
+            return catalogProduct!.Shops;
         }
     }
 }

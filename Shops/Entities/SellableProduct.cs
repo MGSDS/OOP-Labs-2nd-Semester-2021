@@ -1,18 +1,21 @@
+using System;
+
 namespace Shops.Entities
 {
-    public class SellableProduct : Product
+    public class SellableProduct : ICloneable
     {
-        public SellableProduct(string name, uint price, uint count)
-            : base(name, count)
+        public SellableProduct(CountableProduct product, uint price)
         {
             Price = price;
+            CountableProduct = product;
         }
 
         public uint Price { get; set; }
+        public CountableProduct CountableProduct { get; }
 
-        public override object Clone()
+        public object Clone()
         {
-            return new SellableProduct(Name, Price, Count);
+            return new SellableProduct(CountableProduct, Price);
         }
     }
 }

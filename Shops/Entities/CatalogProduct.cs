@@ -1,19 +1,17 @@
 using System;
+using System.Collections.Generic;
 
 namespace Shops.Entities
 {
-    public class CatalogProduct : ICloneable
+    public class CatalogProduct
     {
-        public CatalogProduct(string name)
+        public CatalogProduct(Product product)
         {
-            Name = name;
+            Product = product;
+            Shops = new List<Shop>();
         }
 
-        public string Name { get; }
-
-        public virtual object Clone()
-        {
-            return new CatalogProduct(Name);
-        }
+        public Product Product { get; }
+        public List<Shop> Shops { get; set; }
     }
 }
