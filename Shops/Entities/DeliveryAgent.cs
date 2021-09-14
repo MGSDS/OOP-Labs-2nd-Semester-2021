@@ -8,45 +8,38 @@ namespace Shops.Entities
 {
     public class DeliveryAgent
     {
-        private List<CatalogProduct> _catalog;
+        private List<Product> _catalog;
 
         public DeliveryAgent()
         {
-            _catalog = new List<CatalogProduct>();
+            _catalog = new List<Product>();
         }
 
-        public IReadOnlyList<CatalogProduct> Catalog => _catalog;
+        public IReadOnlyList<Product> Catalog => _catalog;
 
-        public void RegisterProduct(string productName)
+        public Product RegisterProduct(string productName)
         {
-            CatalogProduct? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Product.Name == productName);
-            if (catalogProduct is null)
-                _catalog.Add(new CatalogProduct(new Product(productName)));
+            Product? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Name == productName);
+            if (catalogProduct is not null)
+                return catalogProduct;
+            _catalog.Add(new Product(productName));
+            return _catalog.Find(catalogProduct => catalogProduct.Name == productName) !;
         }
 
         public void DeliverProductToShop(Shop shop, SellableProduct product)
         {
-            CatalogProduct? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Product == product.CountableProduct.Product);
+            Product? catalogProduct = _catalog.Find(catalogProduct => catalogProduct == product.CountableProduct.Product);
             if (catalogProduct is null)
                 throw new Exception("Product is not registered");
             shop.GiveProduct((SellableProduct)product.Clone());
-            catalogProduct.Shops.Add(shop);
         }
 
         public Product GetProduct(string productName)
         {
-            CatalogProduct? product = _catalog.Find(product => product.Product.Name == productName);
+            Product? product = _catalog.Find(product => product.Name == productName);
             if (product is null)
                 throw new Exception("Product is not registered");
-            return product.Product;
-        }
-
-        public IReadOnlyList<Shop> GetShops(Product product)
-        {
-            CatalogProduct? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Product.Equals(product));
-            if (product is null)
-                throw new Exception("Product is not registered");
-            return catalogProduct!.Shops;
+            return product;
         }
     }
 }

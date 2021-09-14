@@ -10,6 +10,7 @@ namespace Shops.Services
     {
         private DeliveryAgent _deliveryAgent;
         private List<Shop> _shops;
+        private List<CatalogProduct> _catalog;
         private uint _maxId;
 
         public ShopService()
@@ -17,14 +18,17 @@ namespace Shops.Services
             _maxId = 0;
             _shops = new List<Shop>();
             _deliveryAgent = new DeliveryAgent();
+            _catalog = new List<CatalogProduct>();
         }
 
         public IReadOnlyList<Shop> Shops => _shops;
-        public IReadOnlyList<CatalogProduct> Catalog => _deliveryAgent.Catalog;
+        public IReadOnlyList<Product> RegisteredProducts => _deliveryAgent.Catalog;
+        public IReadOnlyList<CatalogProduct> Catalog => _catalog;
 
         public void RegisterProduct(string productName)
         {
-            _deliveryAgent.RegisterProduct(productName);
+            Product product = _deliveryAgent.RegisterProduct(productName);
+            _catalog.Add(new CatalogProduct(product));
         }
 
         public uint RegisterShop(string shopName, string address)
@@ -35,8 +39,10 @@ namespace Shops.Services
 
         public void AddProduct(uint shopId, string productName, uint count, uint price)
         {
+            Shop shop = GetShopById(shopId);
             Product product = _deliveryAgent.GetProduct(productName);
-            _deliveryAgent.DeliverProductToShop(GetShopById(shopId), new SellableProduct(new CountableProduct(product, count), price));
+            _deliveryAgent.DeliverProductToShop(shop, new SellableProduct(new CountableProduct(product, count), price));
+            _catalog.Find(catalogProduct => catalogProduct.Product.Name == productName) !.Shops.Add(shop);
         }
 
         public void ChangePrice(uint shopId, string productName, uint newPrice)
@@ -49,11 +55,13 @@ namespace Shops.Services
         public uint FindCheapestPriceShopId(string productName, uint count)
         {
             Product product = _deliveryAgent.GetProduct(productName);
-            List<Shop> found = _deliveryAgent.GetShops(product)
-                .OrderBy(shop => shop.Products.First(sellableProduct => sellableProduct.CountableProduct.Product.Equals(product)).Price).ToList();
-            if (!found.Any())
+            IEnumerable<Shop>? shops = _catalog.Find(catalogProduct => catalogProduct.Product.Equals(product))?.Shops.Where(shop => shop.CheckAvailability(product, count));
+            if (shops is null)
+                throw new ShopServiceException("Product is not registered");
+            Shop? found = shops.OrderBy(shop => shop.Products.First(sellableProduct => sellableProduct.CountableProduct.Product.Equals(product)).Price).FirstOrDefault();
+            if (found is null)
                 throw new ShopServiceException("There is no not enough product in any shop");
-            return found[0].Id;
+            return found.Id;
         }
 
         public void Buy(Buyer buyer, uint shopId, string productName, uint count)

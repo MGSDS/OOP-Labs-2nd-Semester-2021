@@ -9,8 +9,13 @@ namespace Shops.Entities
     public class Buyer
     {
         private List<CountableProduct> _products;
+
         public Buyer()
-            : this(0) { }
+        {
+            _products = new List<CountableProduct>();
+            Money = 0;
+        }
+
         public Buyer(uint money)
         {
             _products = new List<CountableProduct>();
