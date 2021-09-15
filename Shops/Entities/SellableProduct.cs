@@ -1,8 +1,8 @@
-using System;
+using Shops.Interfaces;
 
 namespace Shops.Entities
 {
-    public class SellableProduct : ICloneable
+    public class SellableProduct : ICloneable<SellableProduct>
     {
         public SellableProduct(CountableProduct product, uint price)
         {
@@ -13,9 +13,9 @@ namespace Shops.Entities
         public uint Price { get; set; }
         public CountableProduct CountableProduct { get; }
 
-        public object Clone()
+        public SellableProduct Clone()
         {
-            return new SellableProduct(CountableProduct, Price);
+            return new SellableProduct(CountableProduct.Clone(), Price);
         }
     }
 }

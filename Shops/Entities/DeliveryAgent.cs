@@ -15,6 +15,11 @@ namespace Shops.Entities
             _catalog = new List<Product>();
         }
 
+        public DeliveryAgent(List<Product> catalog)
+        {
+            _catalog = new List<Product>(catalog);
+        }
+
         public IReadOnlyList<Product> Catalog => _catalog;
 
         public Product RegisterProduct(string productName)
@@ -22,8 +27,9 @@ namespace Shops.Entities
             Product? catalogProduct = _catalog.Find(catalogProduct => catalogProduct.Name == productName);
             if (catalogProduct is not null)
                 return catalogProduct;
-            _catalog.Add(new Product(productName));
-            return _catalog.Find(catalogProduct => catalogProduct.Name == productName) !;
+            catalogProduct = new Product(productName);
+            _catalog.Add(catalogProduct);
+            return catalogProduct;
         }
 
         public void DeliverProductToShop(Shop shop, SellableProduct product)
@@ -31,7 +37,7 @@ namespace Shops.Entities
             Product? catalogProduct = _catalog.Find(catalogProduct => catalogProduct == product.CountableProduct.Product);
             if (catalogProduct is null)
                 throw new Exception("Product is not registered");
-            shop.GiveProduct((SellableProduct)product.Clone());
+            shop.GiveProduct(product.Clone());
         }
 
         public Product GetProduct(string productName)

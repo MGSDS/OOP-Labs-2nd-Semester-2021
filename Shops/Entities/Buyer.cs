@@ -30,7 +30,7 @@ namespace Shops.Entities
             if (cost > Money)
                 throw new ShopServiceException("Buyer doesn't have enough money");
             if (_products.All(buyerProduct => !buyerProduct.Product.Equals(product.Product)))
-                _products.Add((CountableProduct)product.Clone());
+                _products.Add(product.Clone());
             else
                 _products.Find(buyerProduct => buyerProduct.Product.Equals(product.Product)) !.Count += product.Count;
             Money -= cost;
