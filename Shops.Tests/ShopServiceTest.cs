@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
@@ -29,9 +30,10 @@ namespace Shops.Tests
             _shopService.RegisterProduct(productName);
             _shopService.AddProduct(shopId, productName, count, price);
             _shopService.AddProduct(shopId, productName, count, price);
-            Assert.AreEqual(count * 2,
-                _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products
-                    .First(product => product.CountableProduct.Product.Name == productName).CountableProduct.Count);
+            IReadOnlyList<SellableProduct> shopProducts =  _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products;
+            SellableProduct product = shopProducts.First(product => product.CountableProduct.Product.Name == productName);
+            uint actualCount = product.CountableProduct.Count;
+            Assert.AreEqual(count * 2, actualCount);
         }
         
         [Test]
@@ -46,9 +48,9 @@ namespace Shops.Tests
             _shopService.RegisterProduct(productName);
             _shopService.AddProduct(shopId, productName, count, price);
             _shopService.ChangePrice(shopId, productName, newPrice);
-            Assert.AreEqual(newPrice,
-                _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products
-                    .First(product => product.CountableProduct.Product.Name == productName).Price);
+            IReadOnlyList<SellableProduct> shopProducts =  _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products;
+            SellableProduct product = shopProducts.First(product => product.CountableProduct.Product.Name == productName);
+            Assert.AreEqual(newPrice, product.Price);
         }
         
         [Test]
@@ -64,10 +66,10 @@ namespace Shops.Tests
             _shopService.RegisterProduct(productName);
             _shopService.AddProduct(cheapestShopId, productName, count, lowestPrice);
             _shopService.AddProduct(expensiveShopId, productName, count, maxPrice);
-            uint found = _shopService.FindCheapestPriceShopId(productName, count);
-            Assert.AreEqual(lowestPrice,
-                _shopService.Shops.FirstOrDefault(shop => found == shop.Id).Products
-                    .First(product => product.CountableProduct.Product.Name == productName).Price);
+            uint shopId = _shopService.FindCheapestPriceShopId(productName, count);
+            IReadOnlyList<SellableProduct> shopProducts =  _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products;
+            SellableProduct product = shopProducts.First(product => product.CountableProduct.Product.Name == productName);
+            Assert.AreEqual(lowestPrice,product);
         }
         
         [Test]
