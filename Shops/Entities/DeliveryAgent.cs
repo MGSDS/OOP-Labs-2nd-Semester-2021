@@ -1,12 +1,11 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+using Shops.Interfaces;
 
 namespace Shops.Entities
 {
-    public class DeliveryAgent
+    public class DeliveryAgent : ICloneable<DeliveryAgent>
     {
         private List<Product> _catalog;
 
@@ -46,6 +45,11 @@ namespace Shops.Entities
             if (product is null)
                 throw new Exception("Product is not registered");
             return product;
+        }
+
+        public DeliveryAgent Clone()
+        {
+            return new DeliveryAgent(new List<Product>(_catalog));
         }
     }
 }

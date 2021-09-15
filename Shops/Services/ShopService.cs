@@ -21,14 +21,27 @@ namespace Shops.Services
             _catalog = new List<CatalogProduct>();
         }
 
+        public ShopService(DeliveryAgent deliveryAgent)
+        {
+            _maxId = 0;
+            _shops = new List<Shop>();
+            _deliveryAgent = deliveryAgent.Clone();
+            _catalog = new List<CatalogProduct>();
+            foreach (Product product in _deliveryAgent.Catalog)
+            {
+                _catalog.Add(new CatalogProduct(product));
+            }
+        }
+
         public IReadOnlyList<Shop> Shops => _shops;
         public IReadOnlyList<Product> RegisteredProducts => _deliveryAgent.Catalog;
         public IReadOnlyList<CatalogProduct> Catalog => _catalog;
 
-        public void RegisterProduct(string productName)
+        public Product RegisterProduct(string productName)
         {
             Product product = _deliveryAgent.RegisterProduct(productName);
             _catalog.Add(new CatalogProduct(product));
+            return product;
         }
 
         public uint RegisterShop(string shopName, string address)

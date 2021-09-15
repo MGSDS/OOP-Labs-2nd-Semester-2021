@@ -1,4 +1,4 @@
-using System;
+using Shops.Tools;
 
 namespace Shops.Entities
 {
@@ -6,7 +6,7 @@ namespace Shops.Entities
     {
         public Product(string name)
         {
-            Name = name;
+            Name = name ?? throw new ShopServiceException("Product name can not be null");
         }
 
         public string Name { get; }
