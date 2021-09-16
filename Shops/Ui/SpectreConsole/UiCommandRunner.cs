@@ -3,120 +3,75 @@ using System.Linq;
 using Shops.Entities;
 using Shops.Services;
 using Shops.Tools;
+using Shops.Ui.Interfaces;
 using Spectre.Console;
 
-namespace Shops
+namespace Shops.Ui.SpectreConsole
 {
-    public class CommandHandler
+    public class UiCommandRunner : IUiCommandRunner
     {
         private ShopService _shopService;
         private Buyer _buyer;
 
-        public CommandHandler(ShopService shopService, Buyer buyer)
+        public UiCommandRunner(ShopService shopService, Buyer buyer)
         {
             _shopService = shopService;
             _buyer = buyer;
         }
 
-        public void Run(string command)
+        public void ShowBuyerProducts()
         {
-            switch (command)
-            {
-                case "Register product":
-                    RegisterProduct();
-                    break;
-                case "Register shop":
-                    RegisterShop();
-                    break;
-                case "Add product to the shop":
-                    AddProductToShop();
-                    break;
-                case "Change price":
-                    ChangePrice();
-                    break;
-                case "Find cheapest shop":
-                    FindCheapestShop();
-                    break;
-                case "Buy":
-                    Buy();
-                    break;
-                case "Show shop products":
-                    ShowShopProducts();
-                    break;
-                case "Show shops":
-                    ShowShops();
-                    break;
-                case "Show registered products":
-                    ShowRegisteredProducts();
-                    break;
-                case "Show my products":
-                    ShowBuyerProduct();
-                    break;
-                case "Show my money":
-                    ShowBuyerMoney();
-                    break;
-                case "Add money":
-                    AddBuyerMoney();
-                    break;
-            }
-        }
-
-        private void ShowBuyerProduct()
-        {
-            var table = new ProductsTable();
-            table.AddProducts(_buyer.Products);
-            AnsiConsole.Render(table.Table);
+            Table table = TableGenerator.CountableProductsTable(_buyer.Products);
+            AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        private void ShowShops()
+        public void ShowShops()
         {
-            var table = new ShopsTable();
-            table.AddProducts(_shopService.Shops);
-            AnsiConsole.Render(table.Table);
+            Table table = TableGenerator.ShopsTable(_shopService.Shops);
+            AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        private void RegisterProduct()
+        public void RegisterProduct()
         {
             string name = AnsiConsole.Ask<string>("Enter [green]product name[/]?");
             _shopService.RegisterProduct(name);
         }
 
-        private void RegisterShop()
+        public void RegisterShop()
         {
             string name = AnsiConsole.Ask<string>("Enter [green]shop name[/]?");
             string address = AnsiConsole.Ask<string>("Enter [green]shop address[/]?");
             _shopService.RegisterShop(name, address);
         }
 
-        private void ShowBuyerMoney()
+        public void ShowBuyerMoney()
         {
             AnsiConsole.Render(new Markup($"Buyer have [green]{_buyer.Money}[/]\n"));
             ReturnPrompt();
         }
 
-        private void AddBuyerMoney()
+        public void AddBuyerMoney()
         {
             uint money = AnsiConsole.Ask<uint>("How much you want to add?");
             _buyer.Money += money;
         }
 
-        private void ShowRegisteredProducts()
+        public void ShowRegisteredProducts()
         {
-            var table = new CatalogProductsTable();
-            table.AddProducts(_shopService.Catalog);
-            AnsiConsole.Render(table.Table);
+            Table table = TableGenerator.ProductsTable(_shopService.RegisteredProducts);
+            AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        private void ShowShopProducts()
+        public void ShowShopProducts()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
-            var table = new SellableProductsTable();
+            Table table;
             try
             {
-                table.AddProducts(_shopService.GetShopProducts(id));
+                table = TableGenerator.SellableProductsTable(_shopService.GetShopProducts(id));
             }
             catch (ShopServiceException e)
             {
@@ -125,11 +80,11 @@ namespace Shops
                 return;
             }
 
-            AnsiConsole.Render(table.Table);
+            AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        private void AddProductToShop()
+        public void AddProductToShop()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
@@ -146,7 +101,7 @@ namespace Shops
             }
         }
 
-        private void FindCheapestShop()
+        public void FindCheapestShop()
         {
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
             uint count = AnsiConsole.Ask<uint>("Enter [green]products count[/]");
@@ -163,11 +118,11 @@ namespace Shops
             }
 
             AnsiConsole.Markup(
-                $"Cheapest {productName} found in shop with id [green]{shopId}[/] for [green]{_shopService.GetShopProducts(shopId).FirstOrDefault(product => product.Name == productName).Price}[/]\n");
+                $"Cheapest {productName} found in shop with id [green]{shopId}[/] for [green]{_shopService.GetShopProducts(shopId).FirstOrDefault(product => product.CountableProduct.Product.Name == productName).Price}[/]\n");
             ReturnPrompt();
         }
 
-        private void Buy()
+        public void Buy()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
@@ -183,7 +138,7 @@ namespace Shops
             }
         }
 
-        private void ChangePrice()
+        public void ChangePrice()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
