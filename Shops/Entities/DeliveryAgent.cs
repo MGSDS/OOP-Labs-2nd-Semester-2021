@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Shops.Interfaces;
+using Shops.Tools;
 
 namespace Shops.Entities
 {
@@ -35,7 +36,7 @@ namespace Shops.Entities
         {
             Product? catalogProduct = _catalog.Find(catalogProduct => catalogProduct == product.CountableProduct.Product);
             if (catalogProduct is null)
-                throw new Exception("Product is not registered");
+                throw new ShopServiceException("Product is not registered");
             shop.GiveProduct(product.Clone());
         }
 
@@ -43,7 +44,7 @@ namespace Shops.Entities
         {
             Product? product = _catalog.Find(product => product.Name == productName);
             if (product is null)
-                throw new Exception("Product is not registered");
+                throw new ShopServiceException("Product is not registered");
             return product;
         }
 
