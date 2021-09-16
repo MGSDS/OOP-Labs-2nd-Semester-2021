@@ -69,7 +69,7 @@ namespace Shops.Tests
             uint shopId = _shopService.FindCheapestPriceShopId(productName, count);
             IReadOnlyList<SellableProduct> shopProducts =  _shopService.Shops.FirstOrDefault(shop => shopId == shop.Id).Products;
             SellableProduct product = shopProducts.First(product => product.CountableProduct.Product.Name == productName);
-            Assert.AreEqual(lowestPrice,product);
+            Assert.AreEqual(lowestPrice,product.Price);
         }
         
         [Test]
