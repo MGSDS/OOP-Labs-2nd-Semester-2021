@@ -38,7 +38,7 @@ namespace Shops.Ui.SpectreConsole
         {
             _run = true;
             AnsiConsole.Clear();
-            AskAction().cmd();
+            AskAction().Action();
             return _run;
         }
 

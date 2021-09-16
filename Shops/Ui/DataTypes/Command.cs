@@ -2,8 +2,16 @@ using System;
 
 namespace Shops.Ui.DataTypes
 {
-    public record Command(string name, Action cmd)
+    public class Command
     {
-        public override string ToString() => name;
+        public Command(string name, Action action)
+        {
+            Action = action ?? throw new ArgumentException("Action could not be null");
+            Name = name;
+        }
+
+        public string Name { get; }
+        public Action Action { get; }
+        public override string ToString() => Name;
     }
 }
