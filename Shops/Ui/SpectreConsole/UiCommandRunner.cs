@@ -1,77 +1,110 @@
 using System;
-using System.Linq;
-using Shops.Entities;
-using Shops.Services;
+using System.Collections.Generic;
 using Shops.Tools;
+using Shops.Ui.DataTypes;
 using Shops.Ui.Interfaces;
 using Spectre.Console;
 
 namespace Shops.Ui.SpectreConsole
 {
-    public class UiCommandRunner : IUiCommandRunner
+    public class UiCommandRunner
     {
-        private ShopService _shopService;
-        private Buyer _buyer;
+        private ICommandHandler _commandHandler;
+        private List<Command> _commands;
+        private bool _run;
 
-        public UiCommandRunner(ShopService shopService, Buyer buyer)
+        public UiCommandRunner(ICommandHandler commandhandler)
         {
-            _shopService = shopService;
-            _buyer = buyer;
+            _commandHandler = commandhandler;
+            _run = false;
+            _commands = new List<Command>(new[]
+            {
+                new Command("Register product", new Action(RegisterProduct)),
+                new Command("Register shop", new Action(RegisterShop)),
+                new Command("Add product to the shop", new Action(AddProductToShop)),
+                new Command("Change price", new Action(ChangePrice)),
+                new Command("Find cheapest shop", new Action(FindCheapestShop)),
+                new Command("Buy", new Action(Buy)),
+                new Command("Show shop products", new Action(ShowShopProducts)),
+                new Command("Show shops", new Action(ShowShops)),
+                new Command("Show registered products", new Action(ShowRegisteredProducts)),
+                new Command("Show my products", new Action(ShowBuyerProducts)),
+                new Command("Show my money", new Action(ShowBuyerMoney)),
+                new Command("Add money", new Action(AddBuyerMoney)),
+                new Command("exit", new Action(Exit)),
+            });
         }
 
-        public void ShowBuyerProducts()
+        public bool ChooseAction()
         {
-            Table table = TableGenerator.CountableProductsTable(_buyer.Products);
+            _run = true;
+            AnsiConsole.Clear();
+            AskAction().Action();
+            return _run;
+        }
+
+        private Command AskAction()
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<Command>()
+                    .Title("[yellow]Choose action[/]")
+                    .PageSize(10)
+                    .AddChoices(_commands));
+        }
+
+        private void ShowBuyerProducts()
+        {
+            Table table = TableGenerator.CountableProductsTable(_commandHandler.GetBuyerProducts());
             AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        public void ShowShops()
+        private void ShowShops()
         {
-            Table table = TableGenerator.ShopsTable(_shopService.Shops);
+            Table table = TableGenerator.ShopsTable(_commandHandler.GetShops());
             AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        public void RegisterProduct()
+        private void RegisterProduct()
         {
             string name = AnsiConsole.Ask<string>("Enter [green]product name[/]?");
-            _shopService.RegisterProduct(name);
+            _commandHandler.RegisterProduct(name);
         }
 
-        public void RegisterShop()
+        private void RegisterShop()
         {
             string name = AnsiConsole.Ask<string>("Enter [green]shop name[/]?");
             string address = AnsiConsole.Ask<string>("Enter [green]shop address[/]?");
-            _shopService.RegisterShop(name, address);
+            _commandHandler.RegisterShop(name, address);
         }
 
-        public void ShowBuyerMoney()
+        private void ShowBuyerMoney()
         {
-            AnsiConsole.Render(new Markup($"Buyer have [green]{_buyer.Money}[/]\n"));
+            AnsiConsole.Render(new Markup($"Buyer have [green]{_commandHandler.GetBuyerMoney()}[/]\n"));
             ReturnPrompt();
         }
 
-        public void AddBuyerMoney()
+        private void AddBuyerMoney()
         {
             uint money = AnsiConsole.Ask<uint>("How much you want to add?");
-            _buyer.Money += money;
+            _commandHandler.AddBuyerMoney(money);
         }
 
-        public void ShowRegisteredProducts()
+        private void ShowRegisteredProducts()
         {
-            Table table = TableGenerator.ProductsTable(_shopService.RegisteredProducts);
+            Table table = TableGenerator.ProductsTable(_commandHandler.GetRegisteredProducts());
             AnsiConsole.Render(table);
             ReturnPrompt();
         }
 
-        public void ShowShopProducts()
+        private void ShowShopProducts()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             Table table;
             try
             {
-                table = TableGenerator.SellableProductsTable(_shopService.GetShopProducts(id));
+                table = TableGenerator.SellableProductsTable(_commandHandler.GetShopProducts(id));
             }
             catch (ShopServiceException e)
             {
@@ -84,7 +117,7 @@ namespace Shops.Ui.SpectreConsole
             ReturnPrompt();
         }
 
-        public void AddProductToShop()
+        private void AddProductToShop()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
@@ -92,7 +125,7 @@ namespace Shops.Ui.SpectreConsole
             uint price = AnsiConsole.Ask<uint>("Enter [green]product price[/]");
             try
             {
-                _shopService.AddProduct(id, productName, count, price);
+                _commandHandler.AddProductToShop(id, productName, count, price);
             }
             catch (ShopServiceException e)
             {
@@ -101,14 +134,14 @@ namespace Shops.Ui.SpectreConsole
             }
         }
 
-        public void FindCheapestShop()
+        private void FindCheapestShop()
         {
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
             uint count = AnsiConsole.Ask<uint>("Enter [green]products count[/]");
             uint shopId;
             try
             {
-                shopId = _shopService.FindCheapestPriceShopId(productName, count);
+                shopId = _commandHandler.FindCheapestShop(productName, count);
             }
             catch (ShopServiceException e)
             {
@@ -118,18 +151,18 @@ namespace Shops.Ui.SpectreConsole
             }
 
             AnsiConsole.Markup(
-                $"Cheapest {productName} found in shop with id [green]{shopId}[/] for [green]{_shopService.GetShopProducts(shopId).FirstOrDefault(product => product.CountableProduct.Product.Name == productName).Price}[/]\n");
+                $"Cheapest {productName} found in shop with id [green]{shopId}[/] for [green]{_commandHandler.GetProductPrice(shopId, productName)}[/]\n");
             ReturnPrompt();
         }
 
-        public void Buy()
+        private void Buy()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
             uint count = AnsiConsole.Ask<uint>("Enter [green]product count[/]");
             try
             {
-                _shopService.Buy(_buyer, id, productName, count);
+                _commandHandler.Buy(id, productName, count);
             }
             catch (ShopServiceException e)
             {
@@ -138,14 +171,14 @@ namespace Shops.Ui.SpectreConsole
             }
         }
 
-        public void ChangePrice()
+        private void ChangePrice()
         {
             uint id = AnsiConsole.Ask<uint>("Enter [green]shop id[/]");
             string productName = AnsiConsole.Ask<string>("Enter [green]product name[/]");
             uint price = AnsiConsole.Ask<uint>("Enter new [green]product price[/]");
             try
             {
-                _shopService.ChangePrice(id, productName, price);
+                _commandHandler.ChangePrice(id, productName, price);
             }
             catch (ShopServiceException e)
             {
@@ -158,6 +191,11 @@ namespace Shops.Ui.SpectreConsole
         {
             AnsiConsole.Render(new Text("Press Enter to return back"));
             Console.Read();
+        }
+
+        private void Exit()
+        {
+            _run = false;
         }
     }
 }

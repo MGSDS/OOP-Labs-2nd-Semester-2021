@@ -69,7 +69,7 @@ namespace Shops.Entities
         private SellableProduct? TryFindAvailableProduct(Product product, uint count)
         {
             SellableProduct? found = _products.Find(shopProduct => shopProduct.CountableProduct.Product.Equals(product));
-            return found != null && found.CountableProduct.Count < count ? null : found;
+            return found?.CountableProduct.Count < count ? null : found;
         }
     }
 }

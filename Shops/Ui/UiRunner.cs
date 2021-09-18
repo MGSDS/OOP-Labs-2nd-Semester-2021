@@ -7,19 +7,19 @@ namespace Shops.Ui
 {
     public class UiRunner
     {
-        private UiChoice _choice;
+        private UiCommandRunner _choice;
 
         public UiRunner(Buyer buyer, ShopService shopService)
         {
-            _choice = new UiChoice(new UiCommandRunner(shopService, buyer));
+            _choice = new UiCommandRunner(new CommandHandler(shopService, buyer));
         }
 
         public void Run()
         {
-            bool status = true;
-            while (status)
+            bool exit = false;
+            while (!exit)
             {
-                status = _choice.Show();
+                exit = !_choice.ChooseAction();
             }
         }
     }

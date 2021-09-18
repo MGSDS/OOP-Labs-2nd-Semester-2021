@@ -15,7 +15,7 @@ namespace Shops.Entities
             _catalog = new List<Product>();
         }
 
-        public DeliveryAgent(List<Product> catalog)
+        public DeliveryAgent(IReadOnlyList<Product> catalog)
         {
             _catalog = new List<Product>(catalog);
         }
@@ -38,6 +38,14 @@ namespace Shops.Entities
             if (catalogProduct is null)
                 throw new ShopServiceException("Product is not registered");
             shop.GiveProduct(product.Clone());
+        }
+
+        public void DeliverProductsToShop(Shop shop, IReadOnlyList<SellableProduct> products)
+        {
+            foreach (SellableProduct product in products)
+            {
+                DeliverProductToShop(shop, product);
+            }
         }
 
         public Product GetProduct(string productName)
