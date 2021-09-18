@@ -37,13 +37,12 @@ namespace Shops.Tests
         }
         
         [Test]
-        public void ChangeProductPrice_ProductPriceChange()
+        [TestCase(12U, 11U, 4U)]
+        [TestCase(13U, 1000U, 4U)]
+        public void ChangeProductPrice_ProductPriceChange(uint price, uint newPrice, uint count)
         {
             const string productName = "TestProduct";
             const string shopName = "TestShop";
-            const uint price = 10;
-            const uint newPrice = 100;
-            const uint count = 100;
             uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
             _shopService.AddProduct(shopId, productName, count, price);
@@ -54,13 +53,13 @@ namespace Shops.Tests
         }
         
         [Test]
-        public void FindCheapestPrice_ShopWithCheapestPriceReturned()
+        [TestCase(10U, 100U, 100U)]
+        [TestCase(1U, 2U, 400U)]
+        [TestCase( 231U, 599U, 1U)]
+        public void FindCheapestPrice_ShopWithCheapestPriceReturned(uint lowestPrice, uint maxPrice, uint count)
         {
             const string productName = "TestProduct";
             const string shopName = "TestShop";
-            const uint lowestPrice = 10;
-            const uint maxPrice = 100;
-            const uint count = 100;
             uint cheapestShopId = _shopService.RegisterShop(shopName, "TestAddress");
             uint expensiveShopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
@@ -73,13 +72,12 @@ namespace Shops.Tests
         }
         
         [Test]
-        public void BuyProduct_BuyerHasProductMoneyDecreaseShopProductCountDecrease()
+        [TestCase(1U, 2U, 400U)]
+        [TestCase(2U, 200U, 10000U)]
+        public void BuyProduct_BuyerHasProductMoneyDecreaseShopProductCountDecrease(uint price, uint count, uint money)
         {
             const string productName = "TestProduct";
             const string shopName = "TestShop";
-            const uint price = 1;
-            const uint count = 100;
-            const uint money = 1000000;
             var buyer = new Buyer(money);
             uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             Shop shop = _shopService.Shops.FirstOrDefault(localShop => localShop.Id == shopId);
@@ -96,13 +94,12 @@ namespace Shops.Tests
         }
         
         [Test]
-        public void BuyProductBuyerHaveNotEnoughMoney_Exception()
+        [TestCase(1U, 2U, 0U)]
+        [TestCase(6U, 400U, 1000U)]
+        public void BuyProductBuyerHaveNotEnoughMoney_Exception(uint price, uint count, uint money)
         {
             const string productName = "TestProduct";
             const string shopName = "TestShop";
-            const uint price = 1;
-            const uint count = 100;
-            const uint money = 0;
             var buyer = new Buyer(money);
             uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
@@ -115,20 +112,19 @@ namespace Shops.Tests
         }
         
         [Test]
-        public void BuyProductShopHasNotEnoughProducts_Exception()
+        [TestCase(6U, 400U, 1000U, 100000U)]
+        [TestCase(6U, 0U, 1U, 100000U)]
+        public void BuyProductShopHasNotEnoughProducts_Exception(uint price, uint countInShop, uint countBuy, uint money)
         {
             const string productName = "TestProduct";
             const string shopName = "TestShop";
-            const uint price = 1;
-            const uint count = 100;
-            const uint money = 10000;
             var buyer = new Buyer(money);
             uint shopId = _shopService.RegisterShop(shopName, "TestAddress");
             _shopService.RegisterProduct(productName);
-            _shopService.AddProduct(shopId, productName, price, count);
+            _shopService.AddProduct(shopId, productName, countInShop, price);
             Assert.Catch<ShopServiceException>(() =>
             {
-                _shopService.Buy(buyer, shopId, productName, count + 1);
+                _shopService.Buy(buyer, shopId, productName, countBuy);
             });
         }
         
