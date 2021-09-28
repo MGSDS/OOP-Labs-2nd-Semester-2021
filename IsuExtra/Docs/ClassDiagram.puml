@@ -1,0 +1,86 @@
+@startuml
+
+class OgnpService{
+    {field} +IsuService
+    
+    {method} +IsuServiceSynchronise()
+    {method} +AddDepartment(Name, CodeLetter) : Department
+    {method} +AddOgnp(Name, Department) : Ognp
+    {method} +CreateOgnpStream(Ognp, MaxStudentsCount) : Group
+    {method} +Enroll(Student, Stream)
+    {method} +Deduct(Student, Stream)
+    {method} +GetNotEnrolledStudents(Group)
+    {method} +GetOgnpStudents()
+}
+
+class OgnpChoise{
+    {field} +Student
+
+    {method} ~Enroll(Stream)
+    {method} ~Deduct(Stream)
+}
+
+class GroupTimetable{
+    {field} +Group
+}
+
+class Stream{
+    {field} +MaxStudents
+    {field} +Students
+    {field} +Name
+    
+    {method} ~Enroll(Student)
+    {method} ~Deduct(Student)
+}
+
+class Ognp{
+    {field} +Name
+     
+    {method} +AddStream(MaxStudentsCount)
+}
+
+class Department{
+    {field} +Name
+    {field} +CodeLetter
+    {method} +AddOgnp(Name)
+}
+
+class Day{
+    {method} +Add(Lesson)
+    {method} +Remove(Lesson) 
+    {method} +CheckIntersection(Day)
+    {method} -Sort()
+}
+
+class Lesson{
+    {field} +StartTime
+    {field} +EndTime
+    {field} +Group
+    {field} +Room
+
+    {method} +CheckIntersection(Lesson)
+}
+
+class Timetable{
+    {method} +CheckIntersection(Timetable)
+}
+
+class Mentor{
+    {field} +Name
+    {field} +Id
+}
+
+OgnpService "1" *-- "0..n" Ognp
+OgnpService "1" *-- "0..n" Department
+OgnpService "1" *-- "0..n" OgnpChoise
+OgnpService "1" *-- "0..n" GroupTimetable
+
+Stream "0..n" o--* "1" Ognp
+Stream "1" o-- "1" Timetable
+OgnpChoise "1" o-- "0..2" Stream
+Day  "1" --* "7" Timetable
+Department "1" o--o "0..n" Ognp
+Day "1" o-- "0..n" Lesson
+GroupTimetable o-- Timetable
+Lesson "1" o-- "1" Mentor
+@enduml
