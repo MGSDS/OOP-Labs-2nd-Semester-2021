@@ -35,11 +35,11 @@ namespace IsuExtra.Services
 
         public void SynchronizeWithIsu()
         {
-            foreach (Group @group in Isu.Groups.Where(@group => !_groupTimetables.Any(x => x.Group.Equals(@group))))
-                _groupTimetables.Add(new GroupTimetable(@group, new Timetable()));
+            foreach (Group group in Isu.Groups.Where(group => !_groupTimetables.Any(x => x.Group.Equals(group))))
+                _groupTimetables.Add(new GroupTimetable(group, new Timetable()));
 
-            foreach (Student @student in Isu.Students.Where(@student =>
-                !_ognpChoises.Any(x => x.Student.Equals(@student))))
+            foreach (Student student in Isu.Students.Where(student =>
+                !_ognpChoises.Any(x => x.Student.Equals(student))))
                 _ognpChoises.Add(new OgnpChoise(student));
         }
 
@@ -56,53 +56,37 @@ namespace IsuExtra.Services
 
         public Ognp RegisterOgnp(string name, Department department)
         {
-            if (!_departments.Contains(department))
-                throw new IsuException("No such department registered");
             if (_ognps.Any(x => x.Name == name))
                 throw new IsuException("Ognp with such name already registered");
-            Ognp ognp = department.AddOgnp(name);
+            Ognp ognp = GetRegisteredDepartment(department).AddOgnp(name);
             _ognps.Add(ognp);
             return ognp;
         }
 
         public Stream CreateOgnpStream(Ognp ognp, ushort maxStudentsCount)
         {
-            if (!_ognps.Contains(ognp))
-                throw new IsuException("Ognp is not registered");
-            return ognp.AddStream(maxStudentsCount);
+            return GetRegisteredOgnp(ognp).AddStream(maxStudentsCount);
         }
 
         public void Enroll(Student student, Stream stream)
         {
-            Ognp ognp = _ognps.Find(x => x.Equals(stream.Ognp)) ??
-                        throw new IsuException("Ognp is not registered");
-            if (!ognp.Streams.Contains(stream))
-                throw new IsuException("No such stream registered");
-            OgnpChoise ognpChoise = _ognpChoises.Find(x => x.Student.Equals(student)) ??
-                                    throw new IsuException("No such student registered");
-            if (stream.Timetable.CheckIntersection(_groupTimetables.Find(x => x.Group.Equals(student.StudyGroup))))
+            Stream foundStream = GetRegisteredStream(stream);
+            OgnpChoise ognpChoise = GetRegisteredOgnpChoise(student);
+            if (foundStream.Timetable.CheckIntersection(_groupTimetables.Find(x => x.Group.Equals(student.StudyGroup))))
                 throw new IsuException("Ognp timetable can not overlap main timetable");
-            ognpChoise.Enroll(stream);
+            ognpChoise.Enroll(foundStream);
         }
 
         public void Deduct(Student student, Stream stream)
         {
-            Ognp ognp = _ognps.Find(x => x.Equals(stream.Ognp)) ??
-                        throw new IsuException("Ognp is not registered");
-            if (!ognp.Streams.Contains(stream))
-                throw new IsuException("No such stream registered");
-            OgnpChoise ognpChoise = _ognpChoises.Find(x => x.Student.Equals(student)) ??
-                                    throw new IsuException("No such student registered");
-            ognpChoise.Deduct(stream);
+            Stream foundStream = GetRegisteredStream(stream);
+            OgnpChoise ognpChoise = GetRegisteredOgnpChoise(student);
+            ognpChoise.Deduct(foundStream);
         }
 
         public IReadOnlyList<Student> GetStudents(Stream stream)
         {
-            Ognp ognp = _ognps.Find(x => x.Equals(stream.Ognp)) ??
-                        throw new IsuException("Ognp is not registered");
-            if (!ognp.Streams.Contains(stream))
-                throw new IsuException("No such stream registered");
-            return stream.Students;
+            return GetRegisteredStream(stream).Students;
         }
 
         public IReadOnlyList<Student> GetNotEnrolledStudents(Group group)
@@ -114,22 +98,15 @@ namespace IsuExtra.Services
                 select ognpChoise.Student).ToList();
         }
 
-        public void AddLesson(GroupTimetable groupTimetable, ushort day, Mentor mentor, ushort startTime, ushort endTime, uint room)
+        public void AddLesson(GroupTimetable groupTimetable, ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
-            if (!_groupTimetables.Contains(groupTimetable))
-                throw new IsuException("GroupTimetable is not registered");
-            if (!_mentors.Contains(mentor))
-                throw new IsuException("Mentor is not registered");
-            groupTimetable.AddLesson(day, mentor, startTime, endTime, room);
+            GetRegisteredGroupTimetable(groupTimetable).AddLesson(day, GetRegisteredMentor(mentor), startTime, endTime, room);
         }
 
-        public void AddLesson(Stream stream, ushort day, Mentor mentor, ushort startTime, ushort endTime, uint room)
+        public void AddLesson(Stream stream, ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
-            if (_ognps.All(x => !x.Streams.Contains(stream)))
-                throw new IsuException("stream is not registered");
-            if (!_mentors.Contains(mentor))
-                throw new IsuException("Mentor is not registered");
-            stream.AddLesson(day, mentor, startTime, endTime, room);
+            Stream foundStream = GetRegisteredStream(stream);
+            foundStream.AddLesson(day, GetRegisteredMentor(mentor), startTime, endTime, room);
         }
 
         public Mentor CreateMentor(string name)
@@ -167,6 +144,42 @@ namespace IsuExtra.Services
         public Mentor FindMentor(string name)
         {
             return _mentors.Find(x => x.Name == name);
+        }
+
+        private Department GetRegisteredDepartment(Department department)
+        {
+            return _departments.Find(dep => dep.Name == department.Name) ??
+                               throw new IsuException("No such department registered");
+        }
+
+        private Mentor GetRegisteredMentor(Mentor mentor)
+        {
+            return _mentors.Find(men => men.Id == mentor.Id) ??
+                   throw new IsuException("No such mentor registered");
+        }
+
+        private Ognp GetRegisteredOgnp(Ognp ognp)
+        {
+            return _ognps.Find(x => x.Name == ognp.Name) ??
+                   throw new IsuException("No such ognp registered");
+        }
+
+        private Stream GetRegisteredStream(Stream stream)
+        {
+            return GetRegisteredOgnp(stream.Ognp).Streams.FirstOrDefault(x => x.Name == stream.Name) ??
+                   throw new IsuException("No such steam registered");
+        }
+
+        private OgnpChoise GetRegisteredOgnpChoise(Student student)
+        {
+            return _ognpChoises.Find(x => x.Student.Equals(student)) ??
+                                    throw new IsuException("No such student registered");
+        }
+
+        private GroupTimetable GetRegisteredGroupTimetable(GroupTimetable groupTimetable)
+        {
+            return _groupTimetables.Find(x => x.Group.Equals(groupTimetable.Group)) ??
+                   throw new IsuException("GroupTimetable is not registered");
         }
     }
 }

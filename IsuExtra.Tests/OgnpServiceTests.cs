@@ -1,3 +1,4 @@
+using System;
 using Isu.Entities;
 using Isu.Services;
 using Isu.Tools;
@@ -132,8 +133,8 @@ namespace IsuExtra.Tests
             Ognp ognp = _ognp.RegisterOgnp("Огнп", department);
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
             Mentor mentor = _ognp.CreateMentor("mentor");
-            _ognp.AddLesson(stream, 0, mentor, 0, 120, 404);
-            _ognp.AddLesson(_ognp.GroupTimetables[0], 0, mentor, 0, 120, 404);
+            _ognp.AddLesson(stream, 0, mentor, new TimeOnly(10,00), new TimeOnly(11, 40), 404);
+            _ognp.AddLesson(_ognp.GroupTimetables[0], 0, mentor, new TimeOnly(10,00), new TimeOnly(11, 40), 404);
             Assert.Catch<IsuException>(() =>
             {
                 _ognp.Enroll(_ognp.OgnpChoises[0].Student, stream);
@@ -271,7 +272,7 @@ namespace IsuExtra.Tests
             Department department = _ognp.RegisterDepartment("ИТИП", 'N');
             Ognp ognp = _ognp.RegisterOgnp("Огнп", department);
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
-            _ognp.AddLesson(stream, 0, _ognp.CreateMentor("Mentor"), 0, 120, 404);
+            _ognp.AddLesson(stream, 0, _ognp.CreateMentor("Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
             Assert.IsNotEmpty(stream.Timetable.Days[0].Lessons);
         }
         
@@ -283,7 +284,7 @@ namespace IsuExtra.Tests
             var stream = new Stream(30, "ongp", ognp);
             Assert.Catch<IsuException>(() =>
             {
-                _ognp.AddLesson(stream, 0, _ognp.CreateMentor("Mentor"), 0, 120, 404);
+                _ognp.AddLesson(stream, 0, _ognp.CreateMentor("Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
             });
         }
         
@@ -295,7 +296,7 @@ namespace IsuExtra.Tests
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
             Assert.Catch<IsuException>(() =>
             {
-                _ognp.AddLesson(stream, 0, new Mentor(0,"Mentor"), 0, 120, 404);
+                _ognp.AddLesson(stream, 0, new Mentor(0,"Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
             });
         }
     }

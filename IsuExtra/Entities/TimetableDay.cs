@@ -1,37 +1,40 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Isu.Tools;
 
 namespace IsuExtra.Entities
 {
-    public class Day
+    public class TimetableDay
     {
         private List<Lesson> _lessons;
 
-        public Day(List<Lesson> lessons)
+        public TimetableDay(List<Lesson> lessons)
         {
             _lessons = new List<Lesson>(lessons);
         }
 
-        public Day()
-        {
-            _lessons = new List<Lesson>();
-        }
+        public TimetableDay()
+            : this(new List<Lesson>()) { }
 
         public IReadOnlyList<Lesson> Lessons => _lessons;
 
         public bool CheckIntersection(Lesson lesson) => _lessons.Any(lsn => lesson.CheckIntersection(lsn));
 
-        public bool CheckIntersection(Day day) =>
-            (from lsn in _lessons from lsn2 in day._lessons where lsn.CheckIntersection(lsn2) select lsn).Any();
+        public bool CheckIntersection(TimetableDay timetableDay)
+        {
+            IEnumerable<Lesson> lessons = from lsn in _lessons
+                from lsn2 in timetableDay._lessons
+                where lsn.CheckIntersection(lsn2)
+                select lsn;
+            return lessons.Any();
+        }
 
         internal void Add(Lesson lesson)
         {
             if (CheckIntersection(lesson))
                 throw new IsuException("Lessons cannot overlap");
             _lessons.Add(lesson);
-            _lessons.Sort((lesson1, lesson2) => lesson1.StartTime.CompareTo(lesson2.StartTime));
+            _lessons.Sort();
         }
 
         internal void Remove(Lesson lesson)

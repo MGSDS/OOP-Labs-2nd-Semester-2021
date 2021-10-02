@@ -1,3 +1,4 @@
+using System;
 using Isu.Entities;
 using Isu.Services;
 using IsuExtra.Entities;
@@ -12,20 +13,28 @@ namespace IsuExtra.Tests.Entities
         [SetUp]
         public void Setup()
         {
-            _lesson = new Lesson(new Group("M3200", 32), new Mentor(0, "q"), 60, 120, 403);
+            _lesson = new Lesson(new Group("M3200", 32), new Mentor(0, "q"), new TimeOnly(10, 00), new TimeOnly(11, 40), 403);
         }
 
         [Test]
-        public void CheckIntersection_IntersectionFound()
+        [TestCase(10, 00, 11, 30)]
+        [TestCase(11, 00, 12, 30)]
+        [TestCase(9, 00, 10, 30)]
+        public void CheckIntersection_IntersectionFound(int startTimeHours, int startTimeMinutes,  int endTimeHours, int endTimeMinutes)
         {
-            Assert.True(_lesson.CheckIntersection(new Lesson(new Group("M3200", 32), new Mentor(0, "q"), 70, 130, 403)));
-            Assert.True(_lesson.CheckIntersection(new Lesson(new Group("M3200", 32), new Mentor(0, "q"), 50, 110, 403)));
+            TimeOnly startTime = new TimeOnly(startTimeHours, startTimeMinutes);
+            TimeOnly endTime = new TimeOnly(endTimeHours, endTimeMinutes);
+            Assert.True(_lesson.CheckIntersection(new Lesson(new Group("M3200", 32), new Mentor(0, "q"), startTime, endTime, 403)));
         }
         
         [Test]
-        public void CheckIntersection_IntersectionNotFound()
+        [TestCase(11, 40, 13, 10)]
+        [TestCase(8, 20, 9, 50)]
+        public void CheckIntersection_IntersectionNotFound(int startTimeHours, int startTimeMinutes,  int endTimeHours, int endTimeMinutes)
         {
-            Assert.False(_lesson.CheckIntersection(new Lesson(new Group("M3200", 32), new Mentor(0, "q"), 130, 210, 403)));
+            TimeOnly startTime = new TimeOnly(startTimeHours, startTimeMinutes);
+            TimeOnly endTime = new TimeOnly(endTimeHours, endTimeMinutes);
+            Assert.False(_lesson.CheckIntersection(new Lesson(new Group("M3200", 32), new Mentor(0, "q"), startTime, endTime, 403)));
         }
     }
 }

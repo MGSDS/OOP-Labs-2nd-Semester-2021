@@ -1,3 +1,4 @@
+using System;
 using Isu.Entities;
 using Isu.Tools;
 
@@ -14,7 +15,7 @@ namespace IsuExtra.Entities
         public Group Group { get; }
         public Timetable Timetable { get; }
 
-        internal void AddLesson(ushort day, Mentor mentor, ushort startTime, ushort endTime, uint room)
+        internal void AddLesson(ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
             var lesson = new Lesson(Group, mentor, startTime, endTime, room);
             if (day >= 7)

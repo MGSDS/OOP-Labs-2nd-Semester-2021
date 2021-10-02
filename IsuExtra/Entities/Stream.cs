@@ -24,7 +24,7 @@ namespace IsuExtra.Entities
 
         public Timetable Timetable { get; }
 
-        internal void AddLesson(ushort day, Mentor mentor, ushort startTime, ushort endTime, uint room)
+        internal void AddLesson(ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
             var lesson = new Lesson(this, mentor, startTime, endTime, room);
             if (day >= 7)

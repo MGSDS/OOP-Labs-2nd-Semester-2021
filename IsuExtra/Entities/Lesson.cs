@@ -1,28 +1,29 @@
+using System;
 using Isu.Entities;
 using Isu.Tools;
 
 namespace IsuExtra.Entities
 {
-    public class Lesson
+    public class Lesson : IComparable<Lesson>
     {
-        public Lesson(Group group, Mentor mentor, uint startTime, uint endTime, uint room)
+        public Lesson(Group group, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
+            : this(mentor, startTime, endTime, room)
         {
-            if (startTime >= endTime)
-                throw new IsuException("EndTime can not be earlier than StartTime");
             Group = group;
             Stream = null;
-            Mentor = mentor;
-            StartTime = startTime;
-            EndTime = endTime;
-            Room = room;
         }
 
-        public Lesson(Stream stream, Mentor mentor, uint startTime, uint endTime, uint room)
+        public Lesson(Stream stream, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
+            : this(mentor, startTime, endTime, room)
+        {
+            Group = null;
+            Stream = stream;
+        }
+
+        private Lesson(Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
             if (startTime >= endTime)
                 throw new IsuException("EndTime can not be earlier than StartTime");
-            Group = null;
-            Stream = stream;
             Mentor = mentor;
             StartTime = startTime;
             EndTime = endTime;
@@ -30,8 +31,8 @@ namespace IsuExtra.Entities
         }
 
         public Mentor Mentor { get; }
-        public uint StartTime { get; }
-        public uint EndTime { get; }
+        public TimeOnly StartTime { get; }
+        public TimeOnly EndTime { get; }
         public Group Group { get; }
 
         public Stream Stream { get; }
@@ -39,8 +40,13 @@ namespace IsuExtra.Entities
 
         public bool CheckIntersection(Lesson lesson)
         {
-            return (StartTime <= lesson.StartTime && lesson.StartTime <= EndTime) ||
-                   (StartTime <= lesson.EndTime && lesson.EndTime <= EndTime);
+            return lesson.StartTime.IsBetween(StartTime, EndTime) ||
+                   lesson.EndTime.IsBetween(StartTime, EndTime);
+        }
+
+        public int CompareTo(Lesson other)
+        {
+            return StartTime.CompareTo(other.StartTime);
         }
     }
 }
