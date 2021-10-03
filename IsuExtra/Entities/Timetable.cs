@@ -23,13 +23,7 @@ namespace IsuExtra.Entities
 
         public IReadOnlyList<TimetableDay> Days => _days;
 
-        public bool CheckIntersection(GroupTimetable timetable)
-        {
-            IEnumerable<TimetableDay> days = from day in _days
-                from timetableDay in timetable.Timetable.Days
-                where day.CheckIntersection(timetableDay)
-                select day;
-            return days.Any();
-        }
+        public bool CheckIntersection(GroupTimetable timetable) =>
+            _days.Any(day => timetable.Timetable.Days.Any(day.CheckIntersection));
     }
 }

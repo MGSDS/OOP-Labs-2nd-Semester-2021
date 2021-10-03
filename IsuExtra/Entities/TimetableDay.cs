@@ -20,14 +20,8 @@ namespace IsuExtra.Entities
 
         public bool CheckIntersection(Lesson lesson) => _lessons.Any(lsn => lesson.CheckIntersection(lsn));
 
-        public bool CheckIntersection(TimetableDay timetableDay)
-        {
-            IEnumerable<Lesson> lessons = from lsn in _lessons
-                from lsn2 in timetableDay._lessons
-                where lsn.CheckIntersection(lsn2)
-                select lsn;
-            return lessons.Any();
-        }
+        public bool CheckIntersection(TimetableDay timetableDay) =>
+            _lessons.Any(day => timetableDay._lessons.Any(day.CheckIntersection));
 
         internal void Add(Lesson lesson)
         {
