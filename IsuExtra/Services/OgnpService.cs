@@ -12,32 +12,26 @@ namespace IsuExtra.Services
     {
         private List<OgnpChoise> _ognpChoises;
         private List<Department> _departments;
-        private List<GroupTimetable> _groupTimetables;
         private List<Ognp> _ognps;
-        private List<Mentor> _mentors;
 
-        public OgnpService(IsuService isu)
+        public OgnpService(IsuService isu, TimetableService timetableService)
         {
             Isu = isu;
+            TimetableService = timetableService;
             _ognps = new List<Ognp>();
             _departments = new List<Department>();
-            _groupTimetables = isu.Groups.Select(x => new GroupTimetable(x, new Timetable())).ToList();
             _ognpChoises = isu.Students.Select(x => new OgnpChoise(x)).ToList();
-            _mentors = new List<Mentor>();
         }
 
         public IsuService Isu { get; }
+        public TimetableService TimetableService { get; }
         public IReadOnlyList<OgnpChoise> OgnpChoises => _ognpChoises;
         public IReadOnlyList<Department> Departments => _departments;
-        public IReadOnlyList<GroupTimetable> GroupTimetables => _groupTimetables;
         public IReadOnlyList<Ognp> Ognps => _ognps;
-        public IReadOnlyList<Mentor> Mentors => _mentors;
 
         public void SynchronizeWithIsu()
         {
-            foreach (Group group in Isu.Groups.Where(group => !_groupTimetables.Any(x => x.Group.Equals(group))))
-                _groupTimetables.Add(new GroupTimetable(group, new Timetable()));
-
+            TimetableService.SynchronizeWithIsu();
             foreach (Student student in Isu.Students.Where(student =>
                 !_ognpChoises.Any(x => x.Student.Equals(student))))
                 _ognpChoises.Add(new OgnpChoise(student));
@@ -72,7 +66,7 @@ namespace IsuExtra.Services
         {
             Stream foundStream = GetRegisteredStream(stream);
             OgnpChoise ognpChoise = GetRegisteredOgnpChoise(student);
-            if (foundStream.Timetable.CheckIntersection(_groupTimetables.Find(x => x.Group.Equals(student.StudyGroup))))
+            if (foundStream.Timetable.CheckIntersection(TimetableService.GroupTimetables.FirstOrDefault(x => x.Group.Equals(student.StudyGroup))))
                 throw new IsuException("Ognp timetable can not overlap main timetable");
             ognpChoise.Enroll(foundStream);
         }
@@ -98,27 +92,10 @@ namespace IsuExtra.Services
                 select ognpChoise.Student).ToList();
         }
 
-        public void AddLesson(GroupTimetable groupTimetable, ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
-        {
-            GetRegisteredGroupTimetable(groupTimetable).AddLesson(day, GetRegisteredMentor(mentor), startTime, endTime, room);
-        }
-
         public void AddLesson(Stream stream, ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
             Stream foundStream = GetRegisteredStream(stream);
-            foundStream.AddLesson(day, GetRegisteredMentor(mentor), startTime, endTime, room);
-        }
-
-        public Mentor CreateMentor(string name)
-        {
-            Mentor mentor = new Mentor(_mentors.Count, name);
-            _mentors.Add(mentor);
-            return mentor;
-        }
-
-        public GroupTimetable FindGroupTimetable(string groupName)
-        {
-            return _groupTimetables.Find(x => x.Group.Name == groupName);
+            foundStream.AddLesson(day, TimetableService.GetRegisteredMentor(mentor), startTime, endTime, room);
         }
 
         public OgnpChoise FindOgnpChoise(uint studentId)
@@ -141,21 +118,10 @@ namespace IsuExtra.Services
             return _departments.Find(x => x.CodeLetter == codeLetter);
         }
 
-        public Mentor FindMentor(string name)
-        {
-            return _mentors.Find(x => x.Name == name);
-        }
-
         private Department GetRegisteredDepartment(Department department)
         {
             return _departments.Find(dep => dep.Name == department.Name) ??
                                throw new IsuException("No such department registered");
-        }
-
-        private Mentor GetRegisteredMentor(Mentor mentor)
-        {
-            return _mentors.Find(men => men.Id == mentor.Id) ??
-                   throw new IsuException("No such mentor registered");
         }
 
         private Ognp GetRegisteredOgnp(Ognp ognp)
@@ -174,12 +140,6 @@ namespace IsuExtra.Services
         {
             return _ognpChoises.Find(x => x.Student.Equals(student)) ??
                                     throw new IsuException("No such student registered");
-        }
-
-        private GroupTimetable GetRegisteredGroupTimetable(GroupTimetable groupTimetable)
-        {
-            return _groupTimetables.Find(x => x.Group.Equals(groupTimetable.Group)) ??
-                   throw new IsuException("GroupTimetable is not registered");
         }
     }
 }

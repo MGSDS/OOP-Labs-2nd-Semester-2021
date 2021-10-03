@@ -12,11 +12,13 @@ namespace IsuExtra.Tests
     {
         private IsuService _isu;
         private OgnpService _ognp;
+        private TimetableService _timetables;
         [SetUp]
         public void Setup()
         {
             _isu = new IsuService(30);
-            _ognp = new OgnpService(_isu);
+            _timetables = new TimetableService(_isu);
+            _ognp = new OgnpService(_isu, _timetables);
             _isu.AddGroup("M3200");
             _isu.AddGroup("M3231");
             _isu.AddStudent(_isu.FindGroup("M3200")!, "Одногрупп 1");
@@ -132,9 +134,9 @@ namespace IsuExtra.Tests
             Department department = _ognp.RegisterDepartment("ИТИП", 'N');
             Ognp ognp = _ognp.RegisterOgnp("Огнп", department);
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
-            Mentor mentor = _ognp.CreateMentor("mentor");
+            Mentor mentor = _timetables.CreateMentor("mentor");
+            _timetables.AddLesson(_timetables.GroupTimetables[0], 0, mentor, new TimeOnly(10,00), new TimeOnly(11, 40), 404);
             _ognp.AddLesson(stream, 0, mentor, new TimeOnly(10,00), new TimeOnly(11, 40), 404);
-            _ognp.AddLesson(_ognp.GroupTimetables[0], 0, mentor, new TimeOnly(10,00), new TimeOnly(11, 40), 404);
             Assert.Catch<IsuException>(() =>
             {
                 _ognp.Enroll(_ognp.OgnpChoises[0].Student, stream);
@@ -242,11 +244,11 @@ namespace IsuExtra.Tests
             Department department = _ognp.RegisterDepartment("ИТИП", 'N');
             Ognp ognp = _ognp.RegisterOgnp("Огнп", department);
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[0], stream);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[1], stream);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[2], stream);
-            _ognp.Enroll(_ognp.GroupTimetables[1].Group.Students[0], stream);
-            _ognp.Enroll(_ognp.GroupTimetables[1].Group.Students[1], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[0], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[1], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[2], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[1].Group.Students[0], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[1].Group.Students[1], stream);
             Assert.AreEqual(5, _ognp.GetStudents(stream).Count);
         }
         
@@ -258,12 +260,12 @@ namespace IsuExtra.Tests
             Ognp ognp2 = _ognp.RegisterOgnp("Огнп2", department);
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
             Stream stream2 = _ognp.CreateOgnpStream(ognp2, 30);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[0], stream);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[1], stream);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[0], stream2);
-            _ognp.Enroll(_ognp.GroupTimetables[0].Group.Students[1], stream2);
-            Assert.AreEqual(_ognp.GroupTimetables[0].Group.Students.Count - 2,
-                _ognp.GetNotEnrolledStudents(_ognp.GroupTimetables[0].Group).Count);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[0], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[1], stream);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[0], stream2);
+            _ognp.Enroll(_timetables.GroupTimetables[0].Group.Students[1], stream2);
+            Assert.AreEqual(_timetables.GroupTimetables[0].Group.Students.Count - 2,
+                _ognp.GetNotEnrolledStudents(_timetables.GroupTimetables[0].Group).Count);
         }
         
         [Test]
@@ -272,7 +274,7 @@ namespace IsuExtra.Tests
             Department department = _ognp.RegisterDepartment("ИТИП", 'N');
             Ognp ognp = _ognp.RegisterOgnp("Огнп", department);
             Stream stream = _ognp.CreateOgnpStream(ognp, 30);
-            _ognp.AddLesson(stream, 0, _ognp.CreateMentor("Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
+            _ognp.AddLesson(stream, 0, _timetables.CreateMentor("Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
             Assert.IsNotEmpty(stream.Timetable.Days[0].Lessons);
         }
         
@@ -284,7 +286,7 @@ namespace IsuExtra.Tests
             var stream = new Stream(30, "ongp", ognp);
             Assert.Catch<IsuException>(() =>
             {
-                _ognp.AddLesson(stream, 0, _ognp.CreateMentor("Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
+                _ognp.AddLesson(stream, 0, _timetables.CreateMentor("Mentor"), new TimeOnly(10, 00), new TimeOnly(11, 40), 404);
             });
         }
         
