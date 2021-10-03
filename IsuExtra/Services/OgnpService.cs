@@ -83,14 +83,10 @@ namespace IsuExtra.Services
             return GetRegisteredStream(stream).Students;
         }
 
-        public IReadOnlyList<Student> GetNotEnrolledStudents(Group group)
-        {
-            return (from student in @group.Students
-                select _ognpChoises.Find(x => x.Student.Equals(student))
-                into ognpChoise
-                where ognpChoise is null || ognpChoise.Streams.Count != 2
-                select ognpChoise.Student).ToList();
-        }
+        public IReadOnlyList<Student> GetNotEnrolledStudents(Group group) =>
+            _ognpChoises.Where(x => group.Students.Any(student => x.Student.Equals(student)))
+                .Where(ognpChoise => ognpChoise is null || ognpChoise.Streams.Count != 2).Select(x => x.Student)
+                .ToList();
 
         public void AddLesson(Stream stream, ushort day, Mentor mentor, TimeOnly startTime, TimeOnly endTime, uint room)
         {
