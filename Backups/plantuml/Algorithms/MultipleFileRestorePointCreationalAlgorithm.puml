@@ -1,0 +1,6 @@
+@startuml
+class MultipleFileRestorePointCreationalAlgorithm {
+    + Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
+}
+IRestorePointCreationalAlgorithm <|-- MultipleFileRestorePointCreationalAlgorithm
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+class BackupJob {
+    + BackupJob(backup:Backup, repository:IRepository, jobObjects:List<JobObject>, restorePointCreationalAlgorithm:IRestorePointCreationalAlgorithm)
+    + BackupJob(backup:Backup, repository:IRepository, restorePointCreationalAlgorithm:IRestorePointCreationalAlgorithm)
+    + AddObject(jobObject:JobObject) : void
+    + RemoveObject(jobObject:JobObject) : void
+    + CreateRestorePoint() : void
+}
+BackupJob --o  Backup
+BackupJob --o "0..n" JobObject
+BackupJob --o IRepository
+BackupJob --o IRestorePointCreationalAlgorithm
+@enduml

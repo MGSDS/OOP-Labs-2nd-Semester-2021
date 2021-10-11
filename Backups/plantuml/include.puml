@@ -1,0 +1,12 @@
+@startuml
+!include ./Algorithms/SingleFileRestorePointCreationalAlgorithm.puml
+!include ./Algorithms/MultipleFileRestorePointCreationalAlgorithm.puml
+!include ./Algorithms/IRestorePointCreationalAlgorithm.puml
+!include ./Repositories/LocalFSRepository.puml
+!include ./Repositories/IRepository.puml
+!include ./Entities/BackupJob.puml
+!include ./Entities/Backup.puml
+!include ./Entities/JobObject.puml
+!include ./Entities/Storage.puml
+!include ./Entities/RestorePoint.puml
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+class RestorePoint {
+    {field} + Id : Guid
+    {field} + BackupTime : DateTime
+
+    + RestorePoint(storages:IReadOnlyList<Storage>, backupTime:DateTime, id:Guid)
+}
+RestorePoint --o "0..n" Storage
+@enduml

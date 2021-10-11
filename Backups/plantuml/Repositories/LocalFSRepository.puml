@@ -1,0 +1,9 @@
+@startuml
+class LocalFSRepository {
+    + LocalFSRepository(repositoryPath:string)
+    + CreateStorage(jobObject:JobObject) : Storage
+    + CreateStorage(jobObjects:List<JobObject>) : Storage
+    + CreateRepository(id:Guid) : IRepository
+}
+IRepository <|-- LocalFSRepository
+@enduml

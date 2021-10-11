@@ -1,0 +1,5 @@
+@startuml
+interface IRestorePointCreationalAlgorithm {
+    Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
+}
+@enduml

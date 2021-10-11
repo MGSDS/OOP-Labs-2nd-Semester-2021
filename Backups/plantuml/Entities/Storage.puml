@@ -1,0 +1,8 @@
+@startuml
+class Storage {
+    + Storage(name:string, path:string, id:Guid)
+    + Name : string <<get>>
+    + Path : string <<get>>
+    + Id : Guid
+}
+@enduml
