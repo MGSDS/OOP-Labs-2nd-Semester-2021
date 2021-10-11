@@ -22,11 +22,7 @@ namespace Backups.Repositories
         public Storage CreateStorage(JobObject jobObject)
         {
             var id = Guid.NewGuid();
-            string oldPath = Path.Combine(jobObject.Path, jobObject.Name);
-            var file = new FileInfo(oldPath);
-            string newFileName = $"{id.ToString()}.{file.Extension}";
-            string newPath = Path.Combine(RepositoryPath, newFileName);
-            File.Copy(oldPath, newPath);
+            string newFileName = CompressFile(jobObject);
             return new Storage(newFileName, RepositoryPath, Guid.NewGuid());
         }
 
@@ -37,7 +33,7 @@ namespace Backups.Repositories
             tempRepository.ClearRepository();
             foreach (JobObject jobObject in jobObjects)
             {
-                tempRepository.CreateStorage(jobObject);
+                tempRepository.CopyFile(jobObject);
             }
 
             ZipFile.CreateFromDirectory(tempRepository.RepositoryPath, $"{RepositoryPath}/{id}.zip");
@@ -69,6 +65,23 @@ namespace Backups.Repositories
         {
             var dir = new DirectoryInfo(RepositoryPath);
             dir.Delete(true);
+        }
+
+        private string CompressFile(JobObject jobObject)
+        {
+            string newFileName = $"{jobObject.Name}.zip";
+            using FileStream originalFileStream = File.Open(Path.Combine(jobObject.Path, jobObject.Name), FileMode.Open);
+            using FileStream compressedFileStream = File.Create(Path.Combine(RepositoryPath, newFileName));
+            using var compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
+            originalFileStream.CopyTo(compressor);
+            return newFileName;
+        }
+
+        private void CopyFile(JobObject jobObject)
+        {
+            string oldPath = Path.Combine(jobObject.Path, jobObject.Name);
+            string newPath = Path.Combine(RepositoryPath, jobObject.Name);
+            File.Copy(oldPath, newPath);
         }
     }
 }

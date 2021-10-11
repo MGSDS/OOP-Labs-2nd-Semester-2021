@@ -8,7 +8,7 @@ namespace Backups.Entities
         {
             var fileInfo = new FileInfo(path);
             Name = fileInfo.Name;
-            Path = fileInfo.Name;
+            Path = fileInfo.Directory.FullName;
         }
 
         public JobObject(string path, string name)

@@ -20,6 +20,9 @@ namespace Backups.Entities
             _restorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
         }
 
+        public BackupJob(Backup backup, IRepository repository, IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm)
+            : this(backup, repository, new List<JobObject>(), restorePointCreationalAlgorithm) { }
+
         public Backup Backup { get; }
         public IReadOnlyList<JobObject> JobObjects => _jobObjects;
 
