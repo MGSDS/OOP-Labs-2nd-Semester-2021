@@ -7,7 +7,7 @@ namespace Backups.Repositories
     public interface IRepository
     {
         Storage CreateStorage(JobObject jobObject);
-        Storage CreateStorage(List<JobObject> jobObjects);
+        Storage CreateStorage(IReadOnlyList<JobObject> jobObjects);
         IRepository CreateRepository(Guid id);
     }
 }
