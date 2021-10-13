@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using Backups.Server.Entities;
+using Backups.Server.Headers;
 
 namespace Backups.Client
 {
@@ -10,6 +14,7 @@ namespace Backups.Client
         private TcpClient _client;
         private string _address;
         private ushort _port;
+        private Stream _stm;
 
         public Client(string address, ushort port)
         {
@@ -18,9 +23,10 @@ namespace Backups.Client
             _port = port;
         }
 
-        public void Connect()
+        public void Start()
         {
             _client.Connect(_address, _port);
+            _stm = _client.GetStream();
         }
 
         public void Close()
@@ -28,30 +34,35 @@ namespace Backups.Client
             _client.Close();
         }
 
-        public void Test()
-        {
-            Console.WriteLine("Connected");
-            Console.Write("Enter the string to be transmitted : ");
-            
-            String str=Console.ReadLine();
-            Stream stm = _client.GetStream();
-                        
-            ASCIIEncoding asen= new ASCIIEncoding();
-            byte[] ba=asen.GetBytes(str);
-            Console.WriteLine("Transmitting.....");
-            
-            stm.Write(ba,0,ba.Length);
-            
-            byte[] bb=new byte[100];
-            int k=stm.Read(bb,0,100);
-            
-            for (int i=0;i<k;i++)
-                Console.Write(Convert.ToChar(bb[i]));
-        }
-
         public void Dispose()
         {
             _client.Dispose();
+        }
+
+        public void SendFile(TransferFile file)
+        {
+            byte[] singleFile = BitConverter.GetBytes(true);
+            byte[] bytes = file.Stream.ToArray();
+            var header = new FileHeader(file.Name, bytes.Length);
+            byte[] headerBytes = header.GetByteHeader();
+            int headerSize = headerBytes.Length;
+            byte[] headerSizeBytes = BitConverter.GetBytes(headerSize);
+            _stm.Write(singleFile, 0, singleFile.Length);
+            _stm.Write(headerSizeBytes, 0, headerSizeBytes.Length);
+            _stm.Write(headerBytes, 0, headerBytes.Length);
+            _stm.Write(bytes, 0, bytes.Length);
+        }
+
+        public void SendFiles(IReadOnlyList<TransferFile> files, string folderName)
+        {
+            byte[] singleFile = BitConverter.GetBytes(false);
+            var header = new FolderHeader(folderName, files.Count);
+            byte[] headerBytes = header.GetByteHeader();
+            int headerSize = headerBytes.Length;
+            byte[] message = singleFile.Concat(BitConverter.GetBytes(headerSize)).Concat(headerBytes).ToArray();
+            _stm.Write(message, 0, message.Length);
+            foreach (TransferFile transferFile in files)
+                SendFile(transferFile);
         }
     }
 }
