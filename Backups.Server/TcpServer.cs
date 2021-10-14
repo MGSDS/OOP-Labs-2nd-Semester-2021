@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Backups.Server.Entities;
-using Backups.Server.Headers;
+using Backups.NetworkTransfer.Entities;
+using Backups.NetworkTransfer.Headers;
 using Backups.Server.Repositories;
-
 namespace Backups.Server
 {
     public class TcpServer
@@ -25,8 +24,6 @@ namespace Backups.Server
         public void Start()
         {
             _listener.Start();
-            _client = _listener.AcceptTcpClient();
-            _stream = _client.GetStream();
         }
 
         public void Stop()
@@ -36,18 +33,17 @@ namespace Backups.Server
 
         public void Read()
         {
-            byte[] singleFileByte = new byte[1];
-            ReadStream(singleFileByte);
-            bool singleFile = BitConverter.ToBoolean(singleFileByte);
-            if (singleFile)
-                SaveFile();
-            else
-                SaveFiles();
+            while (true)
+            {
+                _client = _listener.AcceptTcpClient();
+                _stream = _client.GetStream();
+                var header = new FolderHeader(GetHeader());
+                SaveFiles(header);
+            }
         }
 
         private TransferFile ReceiveSingleFile()
         {
-
             byte[] headerBytes = GetHeader();
             var header = new FileHeader(headerBytes);
             var stream = new MemoryStream();
@@ -57,20 +53,14 @@ namespace Backups.Server
             return new TransferFile(header.GetName(), stream);
         }
 
-        private void SaveFile()
+        private void SaveFiles(FolderHeader header)
         {
-            _repo.Save(ReceiveSingleFile());
-        }
-
-        private void SaveFiles()
-        {
-            byte[] headerBytes = GetHeader();
-            var header = new FolderHeader(headerBytes);
-            IServerRepository newRepository = _repo.CreateInnerRepository(header.GetFolderName());
-            var files = new List<TransferFile>();
-            for (int i = 0; i < header.GetFilesCount(); i++)
-                newRepository.Save(ReceiveSingleFile());
-        }
+            int filesCount = header.GetFilesCount();
+            var files = new List<TransferFile>(filesCount);
+            for (int i = 0; i < filesCount; i++)
+                files.Add(ReceiveSingleFile());
+            _repo.Save(files, header.GetFolderName());
+            }
 
         private byte[] GetHeader()
         {
@@ -90,10 +80,7 @@ namespace Backups.Server
             {
                 int read = _stream.Read(data, offset, remaining);
                 if (read <= 0)
-                {
-                    throw new EndOfStreamException
-                        (String.Format("End of stream reached with {0} bytes left to read", remaining));
-                }
+                    throw new EndOfStreamException($"End of stream reached with {remaining} bytes left to read");
 
                 remaining -= read;
                 offset += read;

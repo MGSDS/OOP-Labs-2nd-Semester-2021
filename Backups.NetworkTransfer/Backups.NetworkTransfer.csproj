@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>preview</LangVersion>
@@ -20,10 +21,5 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Backups.NetworkTransfer\Backups.NetworkTransfer.csproj" />
-    </ItemGroup>
-    
 
 </Project>

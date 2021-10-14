@@ -5,7 +5,7 @@ using Backups.Entities;
 
 namespace Backups.CompressionAlgorithms
 {
-    public class ZipCompress : ICompress
+    public class ZipCompressor : ICompressor
     {
         public void Compress(IReadOnlyList<JobObject> objects, Stream stream)
         {

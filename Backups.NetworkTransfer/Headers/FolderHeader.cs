@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 
-namespace Backups.Server.Headers
+namespace Backups.NetworkTransfer.Headers
 {
     public class FolderHeader
     {
@@ -25,19 +25,10 @@ namespace Backups.Server.Headers
             _count = bytes.Skip(4 + nameSize).Take(4).ToArray();
         }
 
-        public byte[] GetByteHeader()
-        {
-            return _nameSize.Concat(_name).Concat(_count).ToArray();
-        }
+        public byte[] GetByteHeader() => _nameSize.Concat(_name).Concat(_count).ToArray();
 
-        public string GetFolderName()
-        {
-            return Encoding.ASCII.GetString(_name);
-        }
+        public string GetFolderName() => Encoding.ASCII.GetString(_name);
 
-        public int GetFilesCount()
-        {
-            return BitConverter.ToInt32(_count);
-        }
+        public int GetFilesCount() => BitConverter.ToInt32(_count);
     }
 }

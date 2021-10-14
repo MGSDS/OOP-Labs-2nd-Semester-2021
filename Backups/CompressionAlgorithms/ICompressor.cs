@@ -4,7 +4,7 @@ using Backups.Entities;
 
 namespace Backups.CompressionAlgorithms
 {
-    public interface ICompress
+    public interface ICompressor
     {
         void Compress(IReadOnlyList<JobObject> objects, Stream stream);
     }

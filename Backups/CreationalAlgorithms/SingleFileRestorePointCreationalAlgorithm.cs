@@ -10,9 +10,7 @@ namespace Backups.Algorithms
         public RestorePoint Run(List<JobObject> objects, IRepository repository)
         {
             Storage storage = repository.CreateStorage(objects);
-            var storages = new List<Storage>();
-            storages.Add(storage);
-            return new RestorePoint(storages, DateTime.Now, storage.Id);
+            return new RestorePoint(new List<Storage> { storage }, DateTime.Now, storage.Id);
         }
     }
 }

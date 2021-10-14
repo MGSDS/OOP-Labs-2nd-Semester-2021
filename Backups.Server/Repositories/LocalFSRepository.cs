@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
-using Backups.Server.Entities;
+using Backups.NetworkTransfer.Entities;
 using Directory = System.IO.Directory;
 
 namespace Backups.Server.Repositories
@@ -18,26 +18,25 @@ namespace Backups.Server.Repositories
 
         public string RepositoryPath { get; }
 
-        public void Save(TransferFile transferFile)
+        public void Save(IReadOnlyList<TransferFile> transferFiles, string folderName)
         {
-            FileStream fileStream = File.Create(Path.Combine(RepositoryPath, transferFile.Name));
-            transferFile.Stream.Position = 0;
-            transferFile.Stream.CopyTo(fileStream);
-            fileStream.Flush();
-            fileStream.Close();
-        }
-
-        public void Save(IReadOnlyList<TransferFile> transferFile)
-        {
-            foreach (TransferFile file in transferFile)
+            string path = OpenDirectory(folderName);
+            foreach (TransferFile transferFile in transferFiles)
             {
-                Save(file);
+                FileStream file = File.OpenWrite(Path.Combine(path, transferFile.Name));
+                transferFile.Stream.Position = 0;
+                transferFile.Stream.CopyTo(file);
+                file.Flush();
+                file.Close();
             }
         }
 
-        public IServerRepository CreateInnerRepository(string name)
+        private string OpenDirectory(string dirName)
         {
-            return new LocalFSRepository(Path.Combine(RepositoryPath, name));
+            string path = Path.Combine(RepositoryPath, dirName);
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            return path;
         }
     }
 }

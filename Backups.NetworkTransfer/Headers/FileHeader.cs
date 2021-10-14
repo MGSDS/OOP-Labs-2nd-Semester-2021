@@ -1,9 +1,8 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Backups.Server.Headers
+namespace Backups.NetworkTransfer.Headers
 {
     public class FileHeader
     {
@@ -27,19 +26,10 @@ namespace Backups.Server.Headers
             _size = bytes.Skip(4 + nameSize).ToArray();
         }
 
-        public byte[] GetByteHeader()
-        {
-            return _nameSize.Concat(_name).Concat(_size).ToArray();
-        }
+        public byte[] GetByteHeader() => _nameSize.Concat(_name).Concat(_size).ToArray();
 
-        public string GetName()
-        {
-            return Encoding.ASCII.GetString(_name);
-        }
+        public string GetName() => Encoding.ASCII.GetString(_name);
 
-        public int GetSize()
-        {
-            return BitConverter.ToInt32(_size);
-        }
+        public int GetSize() => BitConverter.ToInt32(_size);
     }
 }

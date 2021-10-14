@@ -1,0 +1,68 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Sockets;
+using Backups.NetworkTransfer.Entities;
+using Backups.NetworkTransfer.Headers;
+
+namespace Backups.Client
+{
+    public class TcpFileTransferClient : System.IDisposable
+    {
+        private TcpClient _client;
+        private string _address;
+        private ushort _port;
+        private Stream? _stm;
+
+        public TcpFileTransferClient(string address, ushort port)
+        {
+            _client = new TcpClient();
+            _address = address;
+            _port = port;
+            _stm = null;
+        }
+
+        public void Dispose()
+        {
+            _client.Dispose();
+        }
+
+        public void SendFiles(IReadOnlyList<TransferFile> files, string folderName = "")
+        {
+            var header = new FolderHeader(folderName, files.Count);
+            byte[] headerBytes = header.GetByteHeader();
+            int headerSize = headerBytes.Length;
+            byte[] headerSizeBytes = BitConverter.GetBytes(headerSize);
+            Start();
+            _stm?.Write(headerSizeBytes, 0, headerSizeBytes.Length);
+            _stm?.Write(headerBytes, 0, headerBytes.Length);
+            foreach (TransferFile transferFile in files)
+                SendSingleFile(transferFile);
+            Close();
+        }
+
+        private void SendSingleFile(TransferFile file)
+        {
+            byte[] bytes = file.Stream.ToArray();
+            var header = new FileHeader(file.Name, bytes.Length);
+            byte[] headerBytes = header.GetByteHeader();
+            int headerSize = headerBytes.Length;
+            byte[] headerSizeBytes = BitConverter.GetBytes(headerSize);
+            _stm?.Write(headerSizeBytes, 0, headerSizeBytes.Length);
+            _stm?.Write(headerBytes, 0, headerBytes.Length);
+            _stm?.Write(bytes, 0, bytes.Length);
+        }
+
+        private void Start()
+        {
+            _client.Connect(_address, _port);
+            _stm = _client.GetStream();
+        }
+
+        private void Close()
+        {
+            _client.Close();
+        }
+    }
+}
