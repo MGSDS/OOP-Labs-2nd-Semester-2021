@@ -33,13 +33,9 @@ namespace Backups.Server
 
         public void Read()
         {
-            while (true)
-            {
-                _client = _listener.AcceptTcpClient();
-                _stream = _client.GetStream();
-                var header = new FolderHeader(GetHeader());
-                SaveFiles(header);
-            }
+            _client = _listener.AcceptTcpClient();
+            _stream = _client.GetStream();
+            ReceiveFiles();
         }
 
         private TransferFile ReceiveSingleFile()
@@ -53,8 +49,9 @@ namespace Backups.Server
             return new TransferFile(header.GetName(), stream);
         }
 
-        private void SaveFiles(FolderHeader header)
+        private void ReceiveFiles()
         {
+            var header = new FolderHeader(GetHeader());
             int filesCount = header.GetFilesCount();
             var files = new List<TransferFile>(filesCount);
             for (int i = 0; i < filesCount; i++)

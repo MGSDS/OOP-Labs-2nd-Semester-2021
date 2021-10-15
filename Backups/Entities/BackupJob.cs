@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Backups.Algorithms;
+using Backups.CreationalAlgorithms;
 using Backups.Repositories;
 
 namespace Backups.Entities

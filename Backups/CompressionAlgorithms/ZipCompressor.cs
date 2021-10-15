@@ -9,7 +9,7 @@ namespace Backups.CompressionAlgorithms
     {
         public void Compress(IReadOnlyList<JobObject> objects, Stream stream)
         {
-            var archive = new ZipArchive(stream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true);
+            var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true);
             foreach (JobObject obj in objects)
                 archive.CreateEntryFromFile(Path.Combine(obj.Path, obj.Name), obj.Name, CompressionLevel.Optimal);
         }

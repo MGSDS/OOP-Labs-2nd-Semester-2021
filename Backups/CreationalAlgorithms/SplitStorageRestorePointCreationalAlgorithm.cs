@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Backups.Entities;
 using Backups.Repositories;
 
-namespace Backups.Algorithms
+namespace Backups.CreationalAlgorithms
 {
-    public class MultipleFileRestorePointCreationalAlgorithm : IRestorePointCreationalAlgorithm
+    public class SplitStorageRestorePointCreationalAlgorithm : IRestorePointCreationalAlgorithm
     {
         public RestorePoint Run(List<JobObject> objects, IRepository repository)
         {

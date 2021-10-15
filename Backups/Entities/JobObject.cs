@@ -1,14 +1,11 @@
-using System.IO;
-
 namespace Backups.Entities
 {
     public class JobObject
     {
         public JobObject(string path)
         {
-            var fileInfo = new FileInfo(path);
-            Name = fileInfo.Name;
-            Path = fileInfo.Directory.FullName;
+            Name = System.IO.Path.GetFileName(path);
+            Path = System.IO.Path.GetDirectoryName(path);
         }
 
         public JobObject(string path, string name)

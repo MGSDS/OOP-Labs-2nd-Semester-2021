@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Backups.Entities;
 using Backups.Repositories;
 
-namespace Backups.Algorithms
+namespace Backups.CreationalAlgorithms
 {
-    public class SingleFileRestorePointCreationalAlgorithm : IRestorePointCreationalAlgorithm
+    public class SingleStorageRestorePointCreationalAlgorithm : IRestorePointCreationalAlgorithm
     {
         public RestorePoint Run(List<JobObject> objects, IRepository repository)
         {
