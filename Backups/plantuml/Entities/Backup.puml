@@ -1,7 +1,0 @@
-@startuml
-class Backup {
-    + Backup()
-    + AddRestorePoint(restorePoint:RestorePoint) : void
-}
-Backup --* "0..n" RestorePoint
-@enduml

@@ -1,0 +1,9 @@
+@startuml
+class Storage {
+    + Storage(name:string, path:string, id:Guid, jobObjects:IReadOnlyList<JobObject>)
+    + Name : string <<get>>
+    + Path : string <<get>>
+    + Id : Guid <<Get>>
+}
+Storage o-- "0..n" JobObject
+@enduml

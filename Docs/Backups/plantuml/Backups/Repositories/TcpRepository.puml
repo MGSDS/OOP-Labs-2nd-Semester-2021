@@ -1,0 +1,11 @@
+@startuml
+class TcpRepository implements IRepository {
+    + TcpRepository(address:IPAddress, port:ushort, compressor:ICompressor)
+    + CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
+    + CreateStorage(jobObjects:IReadOnlyList<JobObject>, folderName:string) : Storage
+    + Dispose()
+}
+
+TcpRepository o-- Client.TcpFileTransferClient
+TcpRepository o-- ICompressor
+@enduml

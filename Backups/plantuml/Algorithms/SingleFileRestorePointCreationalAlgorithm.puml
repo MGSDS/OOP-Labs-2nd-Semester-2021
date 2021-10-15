@@ -1,6 +1,0 @@
-@startuml
-class SingleFileRestorePointCreationalAlgorithm {
-    + Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
-}
-IRestorePointCreationalAlgorithm <|-- SingleFileRestorePointCreationalAlgorithm
-@enduml

@@ -1,0 +1,11 @@
+@startuml
+class LocalFsRepository implements IRepository {
+    + LocalFsRepository(repositoryPath:string, compressionAlg:ICompressor)
+    + CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
+    + CreateStorage(jobObjects:IReadOnlyList<JobObject>, folderName:string) : Storage
+    - _repositoryPath : string
+    - OpenDirectory(folderName:string) : string 
+}
+
+LocalFsRepository o-- ICompressor
+@enduml

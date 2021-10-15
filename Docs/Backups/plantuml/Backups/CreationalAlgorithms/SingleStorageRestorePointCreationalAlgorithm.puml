@@ -1,0 +1,5 @@
+@startuml
+class SingleStorageRestorePointCreationalAlgorithm implements IRestorePointCreationalAlgorithm {
+    + Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
+}
+@enduml

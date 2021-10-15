@@ -1,0 +1,12 @@
+@startuml
+class FolderHeader {
+    + FolderHeader(name:string, filesCount:int)
+    + FolderHeader(bytes:byte[])
+    + GetByteHeader() : byte[]
+    + GetFolderName() : string
+    + GetFilesCount() : int
+    - _nameSize : byte[]
+    - _name : byte[] 
+    - _count : byte[]
+}
+@enduml

@@ -1,7 +1,0 @@
-@startuml
-interface IRepository {
-    CreateStorage(jobObject:JobObject) : Storage
-    CreateStorage(jobObjects:List<JobObject>) : Storage
-    CreateRepository(id:Guid) : IRepository
-}
-@enduml

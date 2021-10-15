@@ -1,0 +1,16 @@
+@startuml
+class TcpServer {
+    + TcpServer(port:ushort, repo:IServerRepository)
+    + Start()
+    + Stop()
+    + Read()
+    - _listener : TcpListener
+    - _stream : NetworkStream 
+    - _client : TcpClient
+    - ReceiveSingleFile():TransferFile
+    - ReceiveFiles()
+    - GetHeader() : byte[]
+    - ReadStream(data:byte[])
+}
+TcpServer o-- IServerRepository
+@enduml
