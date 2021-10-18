@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Backups.CompressionAlgorithms;
 using Backups.Entities;
@@ -8,8 +9,8 @@ namespace Backups.Repositories
 {
     public class LocalFsRepository : IRepository
     {
-        private ICompressor _compressor;
-        private string _repositoryPath;
+        private readonly ICompressor _compressor;
+        private readonly string _repositoryPath;
         public LocalFsRepository(string repositoryPath, ICompressor compressionAlg)
         {
             if (compressionAlg == null) throw new ArgumentNullException(nameof(compressionAlg));
@@ -22,7 +23,7 @@ namespace Backups.Repositories
             _compressor = compressionAlg;
         }
 
-        public IReadOnlyList<Storage> CreateStorages(IReadOnlyList<JobObject> jobObjects, string folderName)
+        public IReadOnlyList<Storage> CreateStorages(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
             if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
             if (folderName == null) throw new ArgumentNullException(nameof(folderName));
@@ -33,7 +34,8 @@ namespace Backups.Repositories
             {
                 var id = Guid.NewGuid();
                 string newFileName = $"{id.ToString()}.zip";
-                FileStream stream = File.OpenWrite(Path.Combine(path, newFileName));
+                string filePath = Path.Combine(path, newFileName);
+                FileStream stream = OpenFile(filePath);
                 _compressor.Compress(new List<JobObject> { jobObject }, stream);
                 storages.Add(new Storage(newFileName, path, id, jobObjects));
                 stream.Close();
@@ -49,7 +51,7 @@ namespace Backups.Repositories
             string path = OpenDirectory(folderName);
             var id = Guid.NewGuid();
             string newFileName = $"{id.ToString()}.zip";
-            FileStream stream = File.OpenWrite(Path.Combine(Path.Combine(path, folderName), newFileName));
+            FileStream stream = OpenFile(Path.Combine(Path.Combine(path, folderName), newFileName));
             _compressor.Compress(jobObjects, stream);
             stream.Close();
             return new Storage(newFileName, path, id, jobObjects);
@@ -62,6 +64,12 @@ namespace Backups.Repositories
             if (!Directory.Exists(Path.Combine(_repositoryPath, folderName)))
                 Directory.CreateDirectory(path);
             return path;
+        }
+
+        private FileStream OpenFile(string path)
+        {
+            if (File.Exists(path)) throw new DataException("File already exists");
+            return File.OpenWrite(path);
         }
     }
 }

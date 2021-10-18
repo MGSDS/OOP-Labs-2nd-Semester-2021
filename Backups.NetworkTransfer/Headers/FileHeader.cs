@@ -6,9 +6,9 @@ namespace Backups.NetworkTransfer.Headers
 {
     public class FileHeader
     {
-        private byte[] _size;
-        private byte[] _nameSize;
-        private byte[] _name;
+        private readonly byte[] _size;
+        private readonly byte[] _nameSize;
+        private readonly byte[] _name;
 
         public FileHeader(string name, int size)
         {

@@ -6,9 +6,9 @@ namespace Backups.NetworkTransfer.Headers
 {
     public class FolderHeader
     {
-        private byte[] _nameSize;
-        private byte[] _name;
-        private byte[] _count;
+        private readonly byte[] _nameSize;
+        private readonly byte[] _name;
+        private readonly byte[] _count;
 
         public FolderHeader(string name, int filesCount)
         {

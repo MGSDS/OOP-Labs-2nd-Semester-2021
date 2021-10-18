@@ -11,8 +11,8 @@ namespace Backups.Repositories
 {
     public class TcpRepository : IRepository, IDisposable
     {
-        private TcpFileTransferClient _client;
-        private ICompressor _compressor;
+        private readonly TcpFileTransferClient _client;
+        private readonly ICompressor _compressor;
 
         public TcpRepository(IPAddress address, ushort port, ICompressor compressor)
         {

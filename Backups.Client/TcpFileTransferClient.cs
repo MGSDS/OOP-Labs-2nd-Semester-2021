@@ -10,9 +10,9 @@ namespace Backups.Client
 {
     public class TcpFileTransferClient : System.IDisposable
     {
-        private TcpClient _client;
-        private string _address;
-        private ushort _port;
+        private readonly TcpClient _client;
+        private readonly string _address;
+        private readonly ushort _port;
         private Stream? _stm;
 
         public TcpFileTransferClient(string address, ushort port)

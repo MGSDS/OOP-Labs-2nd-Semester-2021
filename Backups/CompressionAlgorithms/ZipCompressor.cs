@@ -12,7 +12,7 @@ namespace Backups.CompressionAlgorithms
         {
             if (objects == null) throw new ArgumentNullException(nameof(objects));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true);
             foreach (JobObject obj in objects)
                 archive.CreateEntryFromFile(Path.Combine(obj.Path, obj.Name), obj.Name, CompressionLevel.Optimal);
         }

@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Backups.NetworkTransfer.Entities;
 using Directory = System.IO.Directory;
 
 namespace Backups.Server.Repositories
 {
-    public class LocalFSRepository : IServerRepository
+    public class LocalFsRepository : IServerRepository
     {
-        public LocalFSRepository(string repositoryPath)
+        public LocalFsRepository(string repositoryPath)
         {
             RepositoryPath = repositoryPath ?? throw new ArgumentNullException(nameof(repositoryPath));
             if (!Directory.Exists(RepositoryPath))
@@ -26,7 +27,9 @@ namespace Backups.Server.Repositories
             string path = OpenDirectory(folderName);
             foreach (TransferFile transferFile in transferFiles)
             {
-                FileStream file = File.OpenWrite(Path.Combine(path, transferFile.Name));
+                string filePath = Path.Combine(path, transferFile.Name);
+                if (File.Exists(filePath)) throw new DataException("File already exists");
+                FileStream file = File.OpenWrite(filePath);
                 transferFile.Stream.Position = 0;
                 transferFile.Stream.CopyTo(file);
                 file.Flush();

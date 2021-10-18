@@ -8,9 +8,9 @@ namespace Backups.Entities
 {
     public class BackupJob
     {
-        private IRepository _repository;
-        private List<JobObject> _jobObjects;
-        private IRestorePointCreationalAlgorithm _restorePointCreationalAlgorithm;
+        private readonly IRepository _repository;
+        private readonly List<JobObject> _jobObjects;
+        private readonly IRestorePointCreationalAlgorithm _restorePointCreationalAlgorithm;
 
         public BackupJob(Backup backup, IRepository repository, List<JobObject> jobObjects, IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm)
         {
