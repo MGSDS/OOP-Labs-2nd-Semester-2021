@@ -67,6 +67,7 @@ namespace Backups.Client
             {
                 throw new InvalidOperationException("Can not connect to server");
             }
+
             _stm = _client.GetStream();
         }
 
