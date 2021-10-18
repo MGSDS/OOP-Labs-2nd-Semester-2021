@@ -11,9 +11,9 @@ namespace Backups
         private static void Main()
         {
             var backup = new Backup();
-            var repo = new TcpRepository(IPAddress.Parse("127.0.0.1"), 1234, new ZipCompressor());
+            var repository = new TcpRepository(IPAddress.Parse("127.0.0.1"), 1234, new ZipCompressor());
             var algo = new SplitStorageRestorePointCreationalAlgorithm();
-            var joba = new BackupJob(backup, repo, algo);
+            var joba = new BackupJob(backup, repository, algo);
             string path = "path";
             joba.AddObject(new JobObject(path, "file1"));
             joba.AddObject(new JobObject(path, "file2"));

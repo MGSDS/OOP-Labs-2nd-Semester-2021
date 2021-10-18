@@ -30,6 +30,8 @@ namespace Backups.Client
 
         public void SendFiles(IReadOnlyList<TransferFile> files, string folderName = "")
         {
+            if (files == null) throw new ArgumentNullException(nameof(files));
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             var header = new FolderHeader(folderName, files.Count);
             byte[] headerBytes = header.GetByteHeader();
             int headerSize = headerBytes.Length;
@@ -44,6 +46,7 @@ namespace Backups.Client
 
         private void SendSingleFile(TransferFile file)
         {
+            if (file == null) throw new ArgumentNullException(nameof(file));
             byte[] bytes = file.Stream.ToArray();
             var header = new FileHeader(file.Name, bytes.Length);
             byte[] headerBytes = header.GetByteHeader();

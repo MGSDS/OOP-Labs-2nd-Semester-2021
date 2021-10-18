@@ -13,7 +13,7 @@ namespace Backups.Tests
 {
     public class ClientServerTests : IDisposable
     {
-        private Mock<IServerRepository> _serverRepo;
+        private Mock<IServerRepository> _serverRepository;
         private List<TransferFile> _files;
         private string _folderName;
         private TcpServer _server;
@@ -22,14 +22,14 @@ namespace Backups.Tests
         [SetUp]
         public void SetUp()
         {
-            _serverRepo = new Mock<IServerRepository>();
-            _serverRepo.Setup(a => a.Save(It.IsAny<IReadOnlyList<TransferFile>>(), It.IsAny<string>()))
+            _serverRepository = new Mock<IServerRepository>();
+            _serverRepository.Setup(a => a.Save(It.IsAny<IReadOnlyList<TransferFile>>(), It.IsAny<string>()))
                 .Callback((IReadOnlyList<TransferFile> x, string y) =>
                 {
                     _files = (List<TransferFile>) x;
                     _folderName = y;
                 });
-            _server = new TcpServer(1234, _serverRepo.Object);
+            _server = new TcpServer(1234, _serverRepository.Object);
             _client = new TcpFileTransferClient("127.0.0.1", 1234);
         }
 

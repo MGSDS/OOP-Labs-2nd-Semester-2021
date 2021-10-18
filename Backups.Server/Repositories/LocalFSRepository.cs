@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Backups.NetworkTransfer.Entities;
@@ -9,7 +10,7 @@ namespace Backups.Server.Repositories
     {
         public LocalFSRepository(string repositoryPath)
         {
-            RepositoryPath = repositoryPath;
+            RepositoryPath = repositoryPath ?? throw new ArgumentNullException(nameof(repositoryPath));
             if (!Directory.Exists(RepositoryPath))
             {
                 Directory.CreateDirectory(RepositoryPath);
@@ -20,6 +21,8 @@ namespace Backups.Server.Repositories
 
         public void Save(IReadOnlyList<TransferFile> transferFiles, string folderName)
         {
+            if (transferFiles == null) throw new ArgumentNullException(nameof(transferFiles));
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             string path = OpenDirectory(folderName);
             foreach (TransferFile transferFile in transferFiles)
             {
@@ -33,6 +36,7 @@ namespace Backups.Server.Repositories
 
         private string OpenDirectory(string dirName)
         {
+            if (dirName == null) throw new ArgumentNullException(nameof(dirName));
             string path = Path.Combine(RepositoryPath, dirName);
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);

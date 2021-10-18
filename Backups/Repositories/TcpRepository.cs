@@ -16,12 +16,15 @@ namespace Backups.Repositories
 
         public TcpRepository(IPAddress address, ushort port, ICompressor compressor)
         {
+            if (address == null) throw new ArgumentNullException(nameof(address));
             _client = new TcpFileTransferClient(address.ToString(), port);
-            _compressor = compressor;
+            _compressor = compressor ?? throw new ArgumentNullException(nameof(compressor));
         }
 
         public IReadOnlyList<Storage> CreateStorages(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
+            if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             var files = new List<TransferFile>(jobObjects.Count);
             var storages = new List<Storage>(jobObjects.Count);
             foreach (JobObject jobObject in jobObjects)
@@ -41,6 +44,8 @@ namespace Backups.Repositories
 
         public Storage CreateStorage(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
+            if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             var storages = new List<Storage>(jobObjects.Count);
             var id = Guid.NewGuid();
             string name = $"{id}.zip";

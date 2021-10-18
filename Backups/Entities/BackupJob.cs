@@ -14,10 +14,10 @@ namespace Backups.Entities
 
         public BackupJob(Backup backup, IRepository repository, List<JobObject> jobObjects, IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm)
         {
-            Backup = backup;
-            _repository = repository;
-            _jobObjects = jobObjects;
-            _restorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
+            Backup = backup ?? throw new ArgumentNullException(nameof(backup));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _jobObjects = jobObjects ?? throw new ArgumentNullException(nameof(jobObjects));
+            _restorePointCreationalAlgorithm = restorePointCreationalAlgorithm ?? throw new ArgumentNullException(nameof(restorePointCreationalAlgorithm));
         }
 
         public BackupJob(Backup backup, IRepository repository, IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm)
@@ -29,7 +29,7 @@ namespace Backups.Entities
         public void AddObject(JobObject jobObject)
         {
             if (JobObjects.Any(obj => obj.Name == jobObject.Name))
-                throw new Exception("Backup not contain files with similar names");
+                throw new ArgumentException("Backup not contain files with similar names");
             _jobObjects.Add(jobObject);
         }
 

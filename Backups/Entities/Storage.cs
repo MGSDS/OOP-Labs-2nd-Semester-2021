@@ -7,10 +7,10 @@ namespace Backups.Entities
     {
         public Storage(string name, string path, Guid id, IReadOnlyList<JobObject> jobObjects)
         {
-            Name = name;
-            Path = path;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Path = path ?? throw new ArgumentNullException(nameof(path));
             Id = id;
-            JobObjects = jobObjects;
+            JobObjects = jobObjects ?? throw new ArgumentNullException(nameof(jobObjects));
         }
 
         public string Name { get; }

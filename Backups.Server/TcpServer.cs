@@ -10,30 +10,30 @@ namespace Backups.Server
 {
     public class TcpServer
     {
-        private TcpListener _listener;
-        private IServerRepository _repo;
+        private TcpListener _tcpListener;
+        private IServerRepository _serverRepository;
         private NetworkStream _stream;
         private TcpClient _client;
 
-        public TcpServer(ushort port, IServerRepository repo)
+        public TcpServer(ushort port, IServerRepository serverRepository)
         {
-            _listener = new TcpListener(IPAddress.Any, port);
-            _repo = repo;
+            _tcpListener = new TcpListener(IPAddress.Any, port);
+            _serverRepository = serverRepository;
         }
 
         public void Start()
         {
-            _listener.Start();
+            _tcpListener.Start();
         }
 
         public void Stop()
         {
-            _listener.Stop();
+            _tcpListener.Stop();
         }
 
         public void Read()
         {
-            _client = _listener.AcceptTcpClient();
+            _client = _tcpListener.AcceptTcpClient();
             _stream = _client.GetStream();
             ReceiveFiles();
         }
@@ -56,7 +56,7 @@ namespace Backups.Server
             var files = new List<TransferFile>(filesCount);
             for (int i = 0; i < filesCount; i++)
                 files.Add(ReceiveSingleFile());
-            _repo.Save(files, header.GetFolderName());
+            _serverRepository.Save(files, header.GetFolderName());
             }
 
         private byte[] GetHeader()

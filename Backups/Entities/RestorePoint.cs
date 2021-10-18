@@ -8,7 +8,7 @@ namespace Backups.Entities
     {
         public RestorePoint(IReadOnlyList<Storage> storages, DateTime backupTime, Guid id)
         {
-            Storages = storages;
+            Storages = storages ?? throw new ArgumentNullException(nameof(storages));
             BackupTime = backupTime;
             Id = id;
         }

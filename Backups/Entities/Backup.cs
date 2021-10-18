@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Backups.Entities
@@ -15,6 +16,7 @@ namespace Backups.Entities
 
         public void AddRestorePoint(RestorePoint restorePoint)
         {
+            if (restorePoint == null) throw new ArgumentNullException(nameof(restorePoint));
             _restorePoints.Add(restorePoint);
         }
     }

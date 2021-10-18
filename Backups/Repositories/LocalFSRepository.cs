@@ -12,7 +12,8 @@ namespace Backups.Repositories
         private string _repositoryPath;
         public LocalFsRepository(string repositoryPath, ICompressor compressionAlg)
         {
-            _repositoryPath = repositoryPath;
+            if (compressionAlg == null) throw new ArgumentNullException(nameof(compressionAlg));
+            _repositoryPath = repositoryPath ?? throw new ArgumentNullException(nameof(repositoryPath));
             if (!Directory.Exists(_repositoryPath))
             {
                 Directory.CreateDirectory(_repositoryPath);
@@ -23,6 +24,8 @@ namespace Backups.Repositories
 
         public IReadOnlyList<Storage> CreateStorages(IReadOnlyList<JobObject> jobObjects, string folderName)
         {
+            if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             string path = OpenDirectory(folderName);
             var storages = new List<Storage>(jobObjects.Count);
 
@@ -41,6 +44,8 @@ namespace Backups.Repositories
 
         public Storage CreateStorage(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
+            if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             string path = OpenDirectory(folderName);
             var id = Guid.NewGuid();
             string newFileName = $"{id.ToString()}.zip";
@@ -52,6 +57,7 @@ namespace Backups.Repositories
 
         private string OpenDirectory(string folderName)
         {
+            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
             string path = Path.Combine(_repositoryPath, folderName);
             if (!Directory.Exists(Path.Combine(_repositoryPath, folderName)))
                 Directory.CreateDirectory(path);
