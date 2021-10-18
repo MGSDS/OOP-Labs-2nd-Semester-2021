@@ -49,7 +49,7 @@ namespace Backups.Repositories
             var storages = new List<Storage>(jobObjects.Count);
             var id = Guid.NewGuid();
             string name = $"{id}.zip";
-            MemoryStream mem = new MemoryStream();
+            var mem = new MemoryStream();
             _compressor.Compress(jobObjects, mem);
             var files = new List<TransferFile> { new TransferFile(name, mem) };
             _client.SendFiles(files, folderName);

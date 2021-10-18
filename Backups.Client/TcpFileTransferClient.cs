@@ -8,7 +8,7 @@ using Backups.NetworkTransfer.Headers;
 
 namespace Backups.Client
 {
-    public class TcpFileTransferClient : System.IDisposable
+    public class TcpFileTransferClient : IDisposable
     {
         private readonly TcpClient _client;
         private readonly string _address;
@@ -59,7 +59,14 @@ namespace Backups.Client
 
         private void Start()
         {
-            _client.Connect(_address, _port);
+            try
+            {
+                _client.Connect(_address, _port);
+            }
+            catch (SocketException)
+            {
+                throw new InvalidOperationException("Can not connect to server");
+            }
             _stm = _client.GetStream();
         }
 

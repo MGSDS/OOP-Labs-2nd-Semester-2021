@@ -33,6 +33,8 @@ namespace Backups.Server
 
         public void Read()
         {
+            if (!_tcpListener.Server.IsBound)
+                throw new InvalidOperationException("Server is not started");
             _client = _tcpListener.AcceptTcpClient();
             _stream = _client.GetStream();
             ReceiveFiles();
