@@ -21,32 +21,10 @@ namespace Backups.Repositories
             _compressor = compressor ?? throw new ArgumentNullException(nameof(compressor));
         }
 
-        public IReadOnlyList<Storage> CreateStorages(IReadOnlyList<JobObject> jobObjects, string folderName = "")
-        {
-            if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
-            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
-            var files = new List<TransferFile>(jobObjects.Count);
-            var storages = new List<Storage>(jobObjects.Count);
-            foreach (JobObject jobObject in jobObjects)
-            {
-                var id = Guid.NewGuid();
-                string name = $"{id}.zip";
-                var mem = new MemoryStream();
-                var objects = new List<JobObject> { jobObject };
-                _compressor.Compress(objects, mem);
-                files.Add(new TransferFile(name, mem));
-                storages.Add(new Storage(name, Path.Combine(":SERVER:", folderName), id, objects));
-            }
-
-            _client.SendFiles(files, folderName);
-            return storages;
-        }
-
         public Storage CreateStorage(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
             if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
             if (folderName == null) throw new ArgumentNullException(nameof(folderName));
-            var storages = new List<Storage>(jobObjects.Count);
             var id = Guid.NewGuid();
             string name = $"{id}.zip";
             var mem = new MemoryStream();

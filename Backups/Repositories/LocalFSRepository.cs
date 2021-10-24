@@ -23,27 +23,6 @@ namespace Backups.Repositories
             _compressor = compressionAlg;
         }
 
-        public IReadOnlyList<Storage> CreateStorages(IReadOnlyList<JobObject> jobObjects, string folderName = "")
-        {
-            if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
-            if (folderName == null) throw new ArgumentNullException(nameof(folderName));
-            string path = OpenDirectory(folderName);
-            var storages = new List<Storage>(jobObjects.Count);
-
-            foreach (JobObject jobObject in jobObjects)
-            {
-                var id = Guid.NewGuid();
-                string newFileName = $"{id.ToString()}.zip";
-                string filePath = Path.Combine(path, newFileName);
-                FileStream stream = OpenFile(filePath);
-                _compressor.Compress(new List<JobObject> { jobObject }, stream);
-                storages.Add(new Storage(newFileName, path, id, jobObjects));
-                stream.Close();
-            }
-
-            return storages;
-        }
-
         public Storage CreateStorage(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
             if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
