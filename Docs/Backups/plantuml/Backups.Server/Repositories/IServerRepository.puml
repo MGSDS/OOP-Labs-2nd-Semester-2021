@@ -1,5 +1,0 @@
-@startuml
-interface IServerRepository {
-    Save(transferFiles:IReadOnlyList<TransferFile>, folderName:string)
-}
-@enduml

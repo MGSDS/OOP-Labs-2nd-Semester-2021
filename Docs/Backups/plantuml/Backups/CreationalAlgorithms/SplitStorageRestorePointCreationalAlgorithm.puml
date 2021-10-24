@@ -1,5 +1,0 @@
-@startuml
-class SplitStorageRestorePointCreationalAlgorithm implements IRestorePointCreationalAlgorithm {
-    + Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
-}
-@enduml

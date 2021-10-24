@@ -1,5 +1,0 @@
-@startuml
-class ZipCompressor implements ICompressor {
-    + Compress(objects:IReadOnlyList<JobObject>, stream:Stream)
-}
-@enduml

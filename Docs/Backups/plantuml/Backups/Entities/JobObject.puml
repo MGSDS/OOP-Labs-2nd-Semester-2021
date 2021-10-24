@@ -1,8 +1,0 @@
-@startuml
-class JobObject {
-    + JobObject(path:string)
-    + JobObject(path:string, name:string)
-    + Name : string <<get>>
-    + Path : string <<get>>
-}
-@enduml

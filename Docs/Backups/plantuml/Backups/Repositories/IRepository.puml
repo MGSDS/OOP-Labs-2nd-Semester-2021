@@ -1,6 +1,0 @@
-@startuml
-interface IRepository {
-    CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
-    CreateStorage(jobObjects:IReadOnlyList<JobObject>, folderName:string) : Storage
-}
-@enduml

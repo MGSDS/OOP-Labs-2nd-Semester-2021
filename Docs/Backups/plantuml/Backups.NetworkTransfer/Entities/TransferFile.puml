@@ -1,7 +1,0 @@
-@startuml
-class TransferFile {
-    + TransferFile(name:string, stream:MemoryStream)
-    + Name : string <<get>>
-    + Stream : MemoryStream <<get>>
-}
-@enduml

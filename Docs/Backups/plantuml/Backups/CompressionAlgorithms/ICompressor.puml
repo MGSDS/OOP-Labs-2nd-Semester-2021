@@ -1,5 +1,0 @@
-@startuml
-interface ICompressor {
-    Compress(objects:IReadOnlyList<JobObject>, stream:Stream)
-}
-@enduml

@@ -1,8 +1,0 @@
-@startuml
-class LocalFSRepository  implements IServerRepository{
-    + LocalFSRepository(repositoryPath:string)
-    + RepositoryPath : string <<get>>
-    + Save(transferFiles:IReadOnlyList<TransferFile>, folderName:string)
-    - OpenDirectory(dirName:string) : string 
-}
-@enduml
