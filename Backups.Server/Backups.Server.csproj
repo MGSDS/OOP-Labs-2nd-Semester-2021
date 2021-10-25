@@ -1,20 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>preview</LangVersion>
-        <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <WarningLevel>5</WarningLevel>
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
-        <EditorConfigFiles Remove="..\.editorconfig"/>
+        <EditorConfigFiles Remove="..\.editorconfig" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\.editorconfig"/>
+        <None Include="..\.editorconfig" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Backups.Client\Backups.Client.csproj"/>
+      <ProjectReference Include="..\Backups.NetworkTransfer\Backups.NetworkTransfer.csproj" />
     </ItemGroup>
 
 </Project>

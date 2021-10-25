@@ -7,9 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Backups.Client\Backups.Client.csproj" />
+    <ProjectReference Include="..\Backups.NetworkTransfer\Backups.NetworkTransfer.csproj" />
+    <ProjectReference Include="..\Backups.Server\Backups.Server.csproj" />
+    <ProjectReference Include="..\Backups\Backups.csproj" />
   </ItemGroup>
 
 </Project>

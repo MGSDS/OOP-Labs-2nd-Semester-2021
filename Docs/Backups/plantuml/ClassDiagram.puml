@@ -1,0 +1,156 @@
+@startuml
+package Backups{
+    package Backups.Repositories{
+        class LocalFsRepository implements IRepository {
+            + LocalFsRepository(repositoryPath:string, compressionAlg:ICompressor)
+            + CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
+            + CreateStorage(jobObjects:IReadOnlyList<JobObject>, folderName:string) : Storage
+        }
+
+        LocalFsRepository o-- ICompressor
+
+        class TcpRepository implements IRepository {
+            + TcpRepository(address:IPAddress, port:ushort, compressor:ICompressor)
+            + CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
+            + CreateStorage(jobObjects:IReadOnlyList<JobObject>, folderName:string) : Storage
+            + Dispose()
+        }
+
+        TcpRepository o-- Client.TcpFileTransferClient
+        TcpRepository o-- ICompressor
+
+        interface IRepository {
+            CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
+        }
+    }
+
+    package Backups.CompressionAlgorithms{
+        class ZipCompressor implements ICompressor {
+            + Compress(objects:IReadOnlyList<JobObject>, stream:Stream)
+        }
+
+        interface ICompressor {
+            Compress(objects:IReadOnlyList<JobObject>, stream:Stream)
+        }
+    }
+
+    package Backups.CreationalAlgorithms{
+        class SingleStorageRestorePointCreationalAlgorithm implements IRestorePointCreationalAlgorithm {
+            + Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
+        }
+
+        class SplitStorageRestorePointCreationalAlgorithm implements IRestorePointCreationalAlgorithm {
+            + Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
+        }
+
+        interface IRestorePointCreationalAlgorithm {
+            Run(objects:List<JobObject>, repository:IRepository) : RestorePoint
+        }
+    }
+
+    package Backups.Entities{
+
+        class Backup {
+            + Backup()
+            + AddRestorePoint(restorePoint:RestorePoint)
+        }
+
+        Backup *-- "0..n" RestorePoint
+
+        class BackupJob {
+            + BackupJob(backup:Backup, repository:IRepository, jobObjects:List<JobObject>, restorePointCreationalAlgorithm:IRestorePointCreationalAlgorithm)
+            + BackupJob(backup:Backup, repository:IRepository, restorePointCreationalAlgorithm:IRestorePointCreationalAlgorithm)
+            + AddObject(jobObject:JobObject)
+            + RemoveObject(jobObject:JobObject)
+        + CreateRestorePoint()
+        }
+
+        BackupJob o-- Backup
+        BackupJob o-- "0..n" JobObject
+        BackupJob o-- IRestorePointCreationalAlgorithm
+        BackupJob o-- IRepository
+
+        class JobObject {
+            + JobObject(path:string)
+            + JobObject(path:string, name:string)
+            + Name : string <<get>>
+            + Path : string <<get>>
+        }
+
+        class RestorePoint {
+            + RestorePoint(storages:IReadOnlyList<Storage>, backupTime:DateTime, id:Guid)
+            + Id : Guid <<Get>>
+            + BackupTime : DateTime <<get>>
+        }
+
+        RestorePoint o-- "0..n" Storage
+
+        class Storage {
+            + Storage(name:string, path:string, id:Guid, jobObjects:IReadOnlyList<JobObject>)
+            + Name : string <<get>>
+            + Path : string <<get>>
+            + Id : Guid <<Get>>
+        }
+
+        Storage o-- "0..n" JobObject
+    }
+}
+package Client{
+    class TcpFileTransferClient {
+        + TcpFileTransferClient(address:string, port:ushort)
+        + Dispose()
+        + SendFiles(files:IReadOnlyList<TransferFile>, folderName:string)
+    }  
+}
+
+package Server{
+    class TcpServer {
+        + TcpServer(port:ushort, repo:IServerRepository)
+        + Start()
+        + Stop()
+        + Read()
+    }
+
+    TcpServer o-- IServerRepository
+
+    package Server.Repositories{
+        class LocalFSRepository  implements IServerRepository{
+            + LocalFSRepository(repositoryPath:string)
+            + RepositoryPath : string <<get>>
+            + Save(transferFiles:IReadOnlyList<TransferFile>, folderName:string)
+        }
+        interface IServerRepository {
+            Save(transferFiles:IReadOnlyList<TransferFile>, folderName:string)
+        }
+    }
+}
+
+package NetworkTransfer{
+    package NetworkTransfer.Headers{
+        class FileHeader {
+            + FileHeader(name:string, size:int)
+            + FileHeader(bytes:byte[])
+            + GetByteHeader() : byte[]
+            + GetName() : string
+            + GetSize() : int
+        }
+
+        class FolderHeader {
+            + FolderHeader(name:string, filesCount:int)
+            + FolderHeader(bytes:byte[])
+            + GetByteHeader() : byte[]
+            + GetFolderName() : string
+            + GetFilesCount() : int
+        }
+    }
+
+    package NetworkTransfer.Entities{
+        class TransferFile {
+            + TransferFile(name:string, stream:MemoryStream)
+            + Name : string <<get>>
+            + Stream : MemoryStream <<get>>
+        }
+    }
+}
+
+@enduml
