@@ -10,16 +10,16 @@ namespace Backups.Client
 {
     public class TcpFileTransferClient : IDisposable
     {
-        private readonly TcpClient _client;
         private readonly string _address;
         private readonly ushort _port;
+        private TcpClient _client;
         private Stream? _stm;
 
         public TcpFileTransferClient(string address, ushort port)
         {
-            _client = new TcpClient();
             _address = address;
             _port = port;
+            _client = new TcpClient();
             _stm = null;
         }
 
@@ -61,6 +61,7 @@ namespace Backups.Client
         {
             try
             {
+                _client = new TcpClient();
                 _client.Connect(_address, _port);
             }
             catch (SocketException)
