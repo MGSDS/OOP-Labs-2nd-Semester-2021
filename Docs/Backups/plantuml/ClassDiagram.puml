@@ -5,8 +5,6 @@ package Backups{
             + LocalFsRepository(repositoryPath:string, compressionAlg:ICompressor)
             + CreateStorages(jobObjects:IReadOnlyList<JobObject>, folderName:string) : IReadOnlyList<Storage>
             + CreateStorage(jobObjects:IReadOnlyList<JobObject>, folderName:string) : Storage
-            - _repositoryPath : string
-            - OpenDirectory(folderName:string) : string 
         }
 
         LocalFsRepository o-- ICompressor
@@ -102,13 +100,6 @@ package Client{
         + TcpFileTransferClient(address:string, port:ushort)
         + Dispose()
         + SendFiles(files:IReadOnlyList<TransferFile>, folderName:string)
-        - SendSingleFile(file:TransferFile)
-        -Start()
-        Close()
-        - _client : TcpClient
-        - _address : string 
-        - _port : ushort 
-        - _stm : Stream?
     }  
 }
 
@@ -118,13 +109,6 @@ package Server{
         + Start()
         + Stop()
         + Read()
-        - _listener : TcpListener
-        - _stream : NetworkStream 
-        - _client : TcpClient
-        - ReceiveSingleFile():TransferFile
-        - ReceiveFiles()
-        - GetHeader() : byte[]
-        - ReadStream(data:byte[])
     }
 
     TcpServer o-- IServerRepository
@@ -134,7 +118,6 @@ package Server{
             + LocalFSRepository(repositoryPath:string)
             + RepositoryPath : string <<get>>
             + Save(transferFiles:IReadOnlyList<TransferFile>, folderName:string)
-            - OpenDirectory(dirName:string) : string 
         }
         interface IServerRepository {
             Save(transferFiles:IReadOnlyList<TransferFile>, folderName:string)
@@ -150,9 +133,6 @@ package NetworkTransfer{
             + GetByteHeader() : byte[]
             + GetName() : string
             + GetSize() : int
-            - _size : byte[]
-            - _nameSize : byte[]
-            - _name : byte[]
         }
 
         class FolderHeader {
@@ -161,9 +141,6 @@ package NetworkTransfer{
             + GetByteHeader() : byte[]
             + GetFolderName() : string
             + GetFilesCount() : int
-            - _nameSize : byte[]
-            - _name : byte[] 
-            - _count : byte[]
         }
     }
 
