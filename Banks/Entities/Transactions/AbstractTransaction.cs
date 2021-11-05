@@ -9,7 +9,6 @@ namespace Banks.Entities.Transactions
         Canceled,
         Successful,
         Failed,
-        CancelationFailed,
     }
 #pragma warning restore SA1602
 

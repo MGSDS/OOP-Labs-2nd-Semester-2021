@@ -40,19 +40,10 @@ namespace Banks.Entities.Transactions
 
         public override void Cancel()
         {
-            if (Status is not (TransactionStatus.Successful or TransactionStatus.CancelationFailed))
+            if (Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException("Transaction can not be canceled");
-            try
-            {
-                Account.IncreaseBalance(Amount);
-                _errorMessage = string.Empty;
-                Status = TransactionStatus.Canceled;
-            }
-            catch (InvalidOperationException e)
-            {
-                _errorMessage = e.Message;
-                Status = TransactionStatus.CancelationFailed;
-            }
+            Account.IncreaseBalance(Amount);
+            Status = TransactionStatus.Canceled;
         }
     }
 }

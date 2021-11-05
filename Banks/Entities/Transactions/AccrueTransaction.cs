@@ -27,33 +27,16 @@ namespace Banks.Entities.Transactions
         {
             if (Status is not TransactionStatus.Ready)
                 throw new InvalidOperationException("Transaction is already done");
-            try
-            {
-                Account.IncreaseBalance(Amount);
-                Status = TransactionStatus.Successful;
-            }
-            catch (InvalidOperationException e)
-            {
-                Status = TransactionStatus.Failed;
-                _errorMessage = e.Message;
-            }
+            Account.IncreaseBalance(Amount);
+            Status = TransactionStatus.Successful;
         }
 
         public override void Cancel()
         {
-            if (Status is not TransactionStatus.Successful or TransactionStatus.CancelationFailed)
+            if (Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException("Transaction can not be canceled");
-            try
-            {
-                Account.DecreaseBalanceWithoutLimit(Amount);
-                _errorMessage = string.Empty;
-                Status = TransactionStatus.Canceled;
-            }
-            catch (InvalidOperationException e)
-            {
-                _errorMessage = e.Message;
-                Status = TransactionStatus.CancelationFailed;
-            }
+            Account.DecreaseBalanceWithoutLimit(Amount);
+            Status = TransactionStatus.Canceled;
         }
     }
 }

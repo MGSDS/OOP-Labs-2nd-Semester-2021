@@ -31,17 +31,8 @@ namespace Banks.Entities.Transactions
         {
             if (Status is not TransactionStatus.Ready)
                 throw new InvalidOperationException("Transaction is already done");
-            try
-            {
-                Account.DecreaseBalanceWithoutLimit(Amount);
-                _errorMessage = string.Empty;
-                Status = TransactionStatus.Successful;
-            }
-            catch (InvalidOperationException e)
-            {
-                Status = TransactionStatus.Failed;
-                _errorMessage = e.Message;
-            }
+            Account.DecreaseBalanceWithoutLimit(Amount);
+            Status = TransactionStatus.Successful;
         }
     }
 }
