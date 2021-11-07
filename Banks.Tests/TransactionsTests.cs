@@ -30,7 +30,7 @@ namespace Banks.Tests
                         new Interest(3, 0),
                         new Interest(4, 100),
                     }),
-                10000,
+                new UnverifiedLimitProvider(10000),
                 "Bank0"));
             _centralBank.SaveChanges();
         }

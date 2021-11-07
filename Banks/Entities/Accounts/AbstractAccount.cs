@@ -15,7 +15,7 @@ namespace Banks.Entities.Accounts
             DateTimeProvider = context.DateTimeProvider;
         }
 
-        protected AbstractAccount(Client client, decimal unverifiedLimit, IDateTimeProvider dateTimeProvider)
+        protected AbstractAccount(Client client, UnverifiedLimitProvider unverifiedLimit, IDateTimeProvider dateTimeProvider)
         {
             Client = client;
             _balance = 0;
@@ -24,7 +24,7 @@ namespace Banks.Entities.Accounts
         }
 
         public Guid Id { get; internal init; }
-        public decimal UnverifiedLimit { get; internal set; }
+        public UnverifiedLimitProvider UnverifiedLimit { get; internal set; }
         [NotMapped]
         public IDateTimeProvider DateTimeProvider { get; internal set; }
         public decimal Balance { get => _balance; internal init => _balance = value; }
@@ -60,7 +60,7 @@ namespace Banks.Entities.Accounts
 
         internal virtual void DecreaseBalance(decimal amount)
         {
-            if (!Client.Verified && amount > UnverifiedLimit)
+            if (!Client.Verified && amount > UnverifiedLimit.UnverifiedLimit)
                 throw new InvalidOperationException("UnverifiedClient can not withdraw of transfer more than a limit");
             DecreaseBalanceWithoutLimit(amount);
         }

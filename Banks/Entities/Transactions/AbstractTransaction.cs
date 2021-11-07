@@ -1,4 +1,5 @@
 using System;
+using Banks.Entities.Accounts;
 
 namespace Banks.Entities.Transactions
 {
@@ -14,8 +15,10 @@ namespace Banks.Entities.Transactions
 
     public abstract class AbstractTransaction
     {
-        public AbstractTransaction(decimal amount, DateTime time)
+        public AbstractTransaction(decimal amount, DateTime time, AbstractAccount from, AbstractAccount to)
         {
+            To = to;
+            From = from;
             Amount = amount;
             Time = time;
             Id = Guid.NewGuid();
@@ -26,6 +29,8 @@ namespace Banks.Entities.Transactions
         {
         }
 
+        public AbstractAccount From { get; init; }
+        public AbstractAccount To { get; init; }
         public Guid Id { get; internal init; }
         public abstract string ErrorMessage { get; internal init; }
         public decimal Amount { get; internal init; }

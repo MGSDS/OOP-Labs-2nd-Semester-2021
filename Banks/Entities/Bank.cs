@@ -22,7 +22,7 @@ namespace Banks.Entities
             CreditInfoProvider creditInfoProvider,
             DebitInterestProvider debitInterestProvider,
             DepositInterestProvider depositInterestProvider,
-            decimal unverifiedLimit,
+            UnverifiedLimitProvider unverifiedLimit,
             string name)
         {
             Id = Guid.NewGuid();
@@ -58,7 +58,7 @@ namespace Banks.Entities
         public CreditInfoProvider CreditInfoProvider { get; internal set; }
         public DebitInterestProvider DebitInterestProvider { get; internal set; }
         public DepositInterestProvider DepositInterestProvider { get; internal set; }
-        public decimal UnverifiedLimit { get; internal set; }
+        public UnverifiedLimitProvider UnverifiedLimit { get; internal set; }
 
         public void AddClient(Client client)
         {
@@ -142,7 +142,7 @@ namespace Banks.Entities
             CreditInfoProvider creditInfoProvider = null,
             DebitInterestProvider debitInterestProvider = null,
             DepositInterestProvider depositInterestProvider = null,
-            decimal unverifiedLimit = -1)
+            UnverifiedLimitProvider unverifiedLimit = null)
         {
             if (creditInfoProvider is not null)
                 CreditInfoProvider = creditInfoProvider;
@@ -150,7 +150,7 @@ namespace Banks.Entities
                 DebitInterestProvider = debitInterestProvider;
             if (depositInterestProvider is not null)
                 DepositInterestProvider = depositInterestProvider;
-            if (unverifiedLimit >= 0)
+            if (unverifiedLimit is not null)
                 UnverifiedLimit = unverifiedLimit;
             foreach (Client subscribedClient in _subscribedClients)
                 subscribedClient.Notify();

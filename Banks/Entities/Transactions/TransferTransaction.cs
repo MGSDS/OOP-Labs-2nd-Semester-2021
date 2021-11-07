@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Banks.Entities.Accounts;
 
 namespace Banks.Entities.Transactions
@@ -7,20 +8,15 @@ namespace Banks.Entities.Transactions
     {
         private string _errorMessage;
 
-        public TransferTransaction(decimal amount, AbstractAccount from, AbstractAccount to, DateTime time)
-        : base(amount, time)
+        public TransferTransaction(decimal amount, AbstractAccount @from, AbstractAccount to, DateTime time)
+        : base(amount, time, from, to)
         {
-            From = from;
-            To = to;
             _errorMessage = string.Empty;
         }
 
         internal TransferTransaction()
         {
         }
-
-        public AbstractAccount From { get; internal init; }
-        public AbstractAccount To { get; internal init; }
 
         public override string ErrorMessage { get => _errorMessage; internal init => _errorMessage = value; }
 

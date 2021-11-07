@@ -7,18 +7,15 @@ namespace Banks.Entities.Transactions
     {
         private string _errorMessage;
 
-        public WithdrawTransaction(decimal amount, AbstractAccount account, DateTime time)
-        : base(amount, time)
+        public WithdrawTransaction(decimal amount, AbstractAccount @from, DateTime time)
+        : base(amount, time, from, null)
         {
-            Account = account;
             _errorMessage = string.Empty;
         }
 
         internal WithdrawTransaction()
         {
         }
-
-        public AbstractAccount Account { get; init; }
 
         public override string ErrorMessage { get => _errorMessage; internal init => _errorMessage = value; }
 
@@ -28,7 +25,7 @@ namespace Banks.Entities.Transactions
                 throw new InvalidOperationException("Transaction is already done");
             try
             {
-                Account.DecreaseBalance(Amount);
+                From.DecreaseBalance(Amount);
                 Status = TransactionStatus.Successful;
             }
             catch (InvalidOperationException e)
@@ -42,7 +39,7 @@ namespace Banks.Entities.Transactions
         {
             if (Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException("Transaction can not be canceled");
-            Account.IncreaseBalance(Amount);
+            From.IncreaseBalance(Amount);
             Status = TransactionStatus.Canceled;
         }
     }

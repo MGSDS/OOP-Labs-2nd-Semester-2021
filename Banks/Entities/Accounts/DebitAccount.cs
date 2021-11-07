@@ -10,7 +10,7 @@ namespace Banks.Entities.Accounts
     {
         private decimal _notAccruedInterest;
 
-        public DebitAccount(Client client, decimal unverifiedLimit, IDateTimeProvider dateTimeProvider, DebitInterestProvider interestProvider)
+        public DebitAccount(Client client, UnverifiedLimitProvider unverifiedLimit, IDateTimeProvider dateTimeProvider, DebitInterestProvider interestProvider)
             : base(client, unverifiedLimit, dateTimeProvider)
         {
             InterestProvider = interestProvider;

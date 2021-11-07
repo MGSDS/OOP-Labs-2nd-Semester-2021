@@ -33,7 +33,7 @@ namespace Banks.Tests
                         new Interest(3, 0),
                         new Interest(4, 100),
                     }),
-                10,
+                new UnverifiedLimitProvider(10),
                 "Bank0"));
             _centralBank.SaveChanges();
         }
@@ -73,7 +73,7 @@ namespace Banks.Tests
             _centralBank.GetBank("Bank0").Subscribe(client);
             _centralBank.SaveChanges();
             Assert.Throws<NotImplementedException>(() =>
-                _centralBank.GetBank("Bank0").ChangeTerms(unverifiedLimit: 100));
+                _centralBank.GetBank("Bank0").ChangeTerms(unverifiedLimit: new UnverifiedLimitProvider(100)));
         }
         
         [Test]

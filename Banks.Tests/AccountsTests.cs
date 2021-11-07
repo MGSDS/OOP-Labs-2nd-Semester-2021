@@ -32,7 +32,7 @@ namespace Banks.Tests
                         new Interest(5, 0),
                         new Interest(10, 100),
                     }),
-                10,
+                new UnverifiedLimitProvider(10),
                 "Bank0"));
             var client = new Client("surname", "name");
             _centralBank.GetBank("Bank0").AddClient(client);

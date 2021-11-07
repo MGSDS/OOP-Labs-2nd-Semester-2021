@@ -8,10 +8,9 @@ namespace Banks.Entities.Transactions
     {
         private string _errorMessage;
 
-        public AccrueTransaction(decimal amount, AbstractAccount account, DateTime time)
-            : base(amount, time)
+        public AccrueTransaction(decimal amount, AbstractAccount to, DateTime time)
+            : base(amount, time, null, to)
         {
-            Account = account;
             _errorMessage = string.Empty;
         }
 
@@ -19,15 +18,13 @@ namespace Banks.Entities.Transactions
         {
         }
 
-        public AbstractAccount Account { get; init; }
-
         public override string ErrorMessage { get => _errorMessage; internal init => _errorMessage = value; }
 
         public override void Execute()
         {
             if (Status is not TransactionStatus.Ready)
                 throw new InvalidOperationException("Transaction is already done");
-            Account.IncreaseBalance(Amount);
+            To.IncreaseBalance(Amount);
             Status = TransactionStatus.Successful;
         }
 
@@ -35,7 +32,7 @@ namespace Banks.Entities.Transactions
         {
             if (Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException("Transaction can not be canceled");
-            Account.DecreaseBalanceWithoutLimit(Amount);
+            To.DecreaseBalanceWithoutLimit(Amount);
             Status = TransactionStatus.Canceled;
         }
     }

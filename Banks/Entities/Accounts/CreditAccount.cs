@@ -7,7 +7,7 @@ namespace Banks.Entities.Accounts
 {
     public class CreditAccount : AbstractAccount
     {
-        public CreditAccount(Client client, decimal unverifiedLimit, IDateTimeProvider dateTimeProvider, CreditInfoProvider creditInfo)
+        public CreditAccount(Client client, UnverifiedLimitProvider unverifiedLimit, IDateTimeProvider dateTimeProvider, CreditInfoProvider creditInfo)
             : base(client, unverifiedLimit, dateTimeProvider)
         {
             CreditInfo = creditInfo;

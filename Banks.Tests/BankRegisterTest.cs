@@ -40,7 +40,7 @@ namespace Banks.Tests
                         new Interest(3, 0),
                         new Interest(4, 100),
                     }),
-                10,
+                new UnverifiedLimitProvider(10),
                 "Bank");
             _centralBank.RegisterBank(bank);
             Bank result = _centralBank.GetBank(bank.Id);

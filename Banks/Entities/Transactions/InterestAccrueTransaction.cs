@@ -5,8 +5,8 @@ namespace Banks.Entities.Transactions
 {
     public class InterestAccrueTransaction : AccrueTransaction
     {
-        public InterestAccrueTransaction(decimal amount, AbstractAccount account, DateTime time)
-            : base(amount, account, time)
+        public InterestAccrueTransaction(decimal amount, AbstractAccount from, DateTime time)
+            : base(amount, from, time)
         {
         }
 

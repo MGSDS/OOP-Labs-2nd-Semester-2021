@@ -12,7 +12,7 @@ namespace Banks.Entities.Accounts
 
         public DepositAccount(
             Client client,
-            decimal unverifiedLimit,
+            UnverifiedLimitProvider unverifiedLimit,
             IDateTimeProvider dateTimeProvider,
             DepositInterestProvider interestProvider,
             DateTime endDate)
