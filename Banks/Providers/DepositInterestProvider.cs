@@ -9,9 +9,9 @@ namespace Banks.Providers
     {
         private List<Interest> _interests;
 
-        public DepositInterestProvider(IReadOnlyList<Interest> interests)
+        public DepositInterestProvider(List<Interest> interests)
         {
-            _interests = (List<Interest>)interests;
+            _interests = interests;
             Id = Guid.NewGuid();
         }
 
