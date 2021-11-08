@@ -4,7 +4,6 @@ using Banks.Entities.Transactions;
 using Banks.Providers;
 using Banks.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Banks.Database
 {

@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Schema;
 using Banks.Entities;
 using Banks.Entities.Accounts;
 using Banks.Entities.Transactions;
 using Banks.Providers;
 using Banks.Services;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
 
 namespace Banks.Database
 {
@@ -66,7 +64,7 @@ namespace Banks.Database
 
         public IReadOnlyList<Bank> GetBankFull()
         {
-            List<Bank> banks = Context.Banks
+            var banks = Context.Banks
                 .Include(x => x.Clients)
                 .Include(x => x.Accounts)
                 .Include(x => x.CreditInfoProvider)
@@ -89,7 +87,7 @@ namespace Banks.Database
 
         public IReadOnlyList<AbstractAccount> GetBankAccounts(Bank bank)
         {
-            List<AbstractAccount> accounts = Context.Banks.Where(x => x == bank)
+            var accounts = Context.Banks.Where(x => x == bank)
                 .Include(x => x.Clients)
                 .Include(x => x.Accounts)
                 .FirstOrDefault()
