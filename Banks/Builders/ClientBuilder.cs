@@ -9,16 +9,23 @@ namespace Banks.Builders
 
         public void SetName(string name, string surname)
         {
+            if (name is null && surname is null)
+                throw new ArgumentNullException("name or surname");
+
             _client = new Client(name, surname);
         }
 
         public void SetId(string passport)
         {
+            if (passport is null)
+                throw new ArgumentNullException("passport");
             _client.Passport = passport;
         }
 
         public void SetAddress(string address)
         {
+            if (address is null)
+                throw new ArgumentNullException("Address");
             _client.Address = address;
         }
 
