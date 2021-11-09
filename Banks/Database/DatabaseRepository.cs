@@ -193,7 +193,14 @@ namespace Banks.Database
 
         public void NotifyBanks()
         {
-            var banks = Context.Banks.Include(x => x.Accounts).ToList();
+            var banks = Context.Banks
+                .Include(x => x.Accounts)
+                .ThenInclude(x => (x as CreditAccount).CreditInfo)
+                .Include(x => x.Accounts)
+                .ThenInclude(x => (x as DebitAccount).InterestProvider)
+                .Include(x => x.Accounts)
+                .ThenInclude(x => (x as DepositAccount).InterestProvider)
+                .ToList();
             foreach (Bank bank in banks)
                 bank.AccountsUpdate();
             Context.SaveChanges();
@@ -202,7 +209,7 @@ namespace Banks.Database
         public void SubscribeClient(Client client, Bank bank)
         {
             Bank foundBank = Context.Banks
-                .Include(x => Clients)
+                .Include(x => x.Clients)
                 .Include(x => x.SubscribedClients)
                 .FirstOrDefault(x => x == bank) ?? throw new NullReferenceException("Bank not registered");
             foundBank.Subscribe(Context.Set<Client>().FirstOrDefault(x => x == client)
