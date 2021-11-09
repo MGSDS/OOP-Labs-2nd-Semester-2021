@@ -5,6 +5,7 @@ using Banks.Builders;
 using Banks.Database;
 using Banks.Entities;
 using Banks.Entities.Accounts;
+using Banks.Entities.Transactions;
 using Banks.Providers;
 using NUnit.Framework;
 
@@ -14,15 +15,17 @@ namespace Banks.Tests
     {
         private IDateTimeProvider _dateTimeProvider;
         private CentralBank _centralBank;
+        private DatabaseRepository _databaseRepository;
 
         [SetUp]
         public void Setup()
         {
             _dateTimeProvider = new DateTimeProvider();
             var context = new BanksContext(_dateTimeProvider, "database.db");
-            var repositopry = new DatabaseRepository(context);
-            _centralBank = new CentralBank(repositopry);
-            _centralBank.RegisterBank(new Bank(_centralBank.TransactionsService,
+            _databaseRepository = new DatabaseRepository(context);
+            _centralBank = new CentralBank(_databaseRepository);
+            _centralBank.RegisterBank(
+                new Bank(_centralBank.TransactionsService,
                 _dateTimeProvider,
                 new CreditInfoProvider(100, 10),
                 new DebitInterestProvider(2),
@@ -35,29 +38,26 @@ namespace Banks.Tests
                 new UnverifiedLimitProvider(10),
                 "Bank0"));
             var client = new Client("surname", "name");
-            _centralBank.GetBank("Bank0").AddClient(client);
-            _centralBank.SaveChanges();
+            _centralBank.RegisterClient(client, _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0"));
         }
         
         [TearDown]
         public void TearDown()
         {
-            _centralBank.DatabaseRepository.Context.Database.EnsureDeleted();
-            _centralBank.DatabaseRepository.Context.Dispose();
+            _databaseRepository.Context.Database.EnsureDeleted();
+            _databaseRepository.Context.Dispose();
         }
         
         [Test]
         [TestCase(100)]
         public void DebitAccountPerecentageAccrue_BalanceChanged(decimal amount)
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            AbstractAccount account = bank.AddDebitAccount(client);
-            bank.Accrue(account, amount);
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount account = _centralBank.AddDebitAccount(client, bank);
+            _centralBank.Accrue(account, bank, amount);
             _dateTimeProvider.Now = _dateTimeProvider.Now.AddYears(1);
             _centralBank.NotifyBanks();
-            _centralBank.SaveChanges();
             Assert.AreEqual(amount * (1 + bank.DebitInterestProvider.Percentage / 100),decimal.Round(account.Balance, 3));
         }
         
@@ -66,14 +66,12 @@ namespace Banks.Tests
         [TestCase(95)]
         public void DepositAccountPerecentageAccrue_BalanceChanged(decimal amount)
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            AbstractAccount account = bank.AddDepositAccount(client, _dateTimeProvider.Now);
-            bank.Accrue(account, amount);
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount account = _centralBank.AddDepositAccount(client, bank, DateTime.Now);
+            _centralBank.Accrue(account, bank, amount);
             _dateTimeProvider.Now = _dateTimeProvider.Now.AddYears(1);
             _centralBank.NotifyBanks();
-            _centralBank.SaveChanges();
             decimal balance = amount;
             for (int i = 0; i < 365; ++i)
                 balance += bank.DepositInterestProvider.GetMultiplier(balance) * balance;
@@ -83,15 +81,13 @@ namespace Banks.Tests
         [Test]
         public void CreditAccountCommissionHold_BalanceDecrease()
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            AbstractAccount account = bank.AddCreditAccount(client);
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount account = _centralBank.AddCreditAccount(client, bank);
             _centralBank.NotifyBanks();
             Assert.AreEqual(0,decimal.Round(account.Balance, 3));
-            bank.Withdraw(account, 5);
+            _centralBank.Withdraw(account, bank, 5);
             _centralBank.NotifyBanks();
-            _centralBank.SaveChanges();
             Assert.AreEqual(-15,decimal.Round(account.Balance, 3));
         }
         
@@ -100,21 +96,20 @@ namespace Banks.Tests
         [TestCase(10000,100)]
         public void UnverifiedLimitExcess_InvalidOperationException(decimal startBalance, decimal withdraw)
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            AbstractAccount creditAccount = bank.AddCreditAccount(client);
-            AbstractAccount debitAaccount = bank.AddDebitAccount(client);
-            AbstractAccount depositAccount = bank.AddDepositAccount(client, _dateTimeProvider.Now);
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount creditAccount = _centralBank.AddCreditAccount(client, bank);
+            AbstractAccount debitAaccount = _centralBank.AddDebitAccount(client, bank);
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now);
             creditAccount.Accrue(startBalance);
             debitAaccount.Accrue(startBalance);
             depositAccount.Accrue(startBalance);
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(creditAccount, withdraw));
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(debitAaccount, withdraw));
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(depositAccount, withdraw));
-            Assert.Throws<InvalidOperationException>(() => bank.Transfer(creditAccount, debitAaccount, withdraw));
-            Assert.Throws<InvalidOperationException>(() => bank.Transfer(depositAccount, debitAaccount, withdraw));
-            Assert.Throws<InvalidOperationException>(() => bank.Transfer(debitAaccount, creditAccount, withdraw));
-            _centralBank.SaveChanges();
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(creditAccount, bank, withdraw));
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(debitAaccount, bank, withdraw));
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(depositAccount, bank, withdraw));
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Transfer(creditAccount, debitAaccount, bank, withdraw));
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Transfer(depositAccount, debitAaccount, bank, withdraw));
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Transfer(debitAaccount, creditAccount, bank, withdraw));
             Assert.AreEqual(startBalance, debitAaccount.Balance);
             Assert.AreEqual(startBalance, creditAccount.Balance);
             Assert.AreEqual(startBalance, depositAccount.Balance);
@@ -123,50 +118,54 @@ namespace Banks.Tests
         [Test]
         public void CreditLimitExceeded_InvalidOperationException()
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            ClientEditor.ChangePassport("passport", client);
-            ClientEditor.ChangeAddress("addres", client);
-            AbstractAccount creditAccount = bank.AddCreditAccount(client);
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(creditAccount, 101));
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            var editor = new ClientEditor(client);
+            editor.ChangeAddress("address");
+            editor.ChangePassport("passport");
+            _centralBank.EditClient(editor);
+            AbstractAccount creditAccount = _centralBank.AddCreditAccount(client, bank);
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(creditAccount, bank, 101));
         }
 
         [Test]
         public void DebitBelowZero_InvalidOperationException()
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            ClientEditor.ChangePassport("passport", client);
-            ClientEditor.ChangeAddress("addres", client);
-            AbstractAccount debitAccount = bank.AddDebitAccount(client);
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(debitAccount, 101));
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount debitAccount = _centralBank.AddDebitAccount(client, bank);
+            var editor = new ClientEditor(client);
+            editor.ChangeAddress("address");
+            editor.ChangePassport("passport");
+            _centralBank.EditClient(editor);
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(debitAccount, bank, 101));
         }
         
         [Test]
         public void DepositBelowZero_InvalidOperationException()
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            ClientEditor.ChangePassport("passport", client);
-            ClientEditor.ChangeAddress("addres", client);
-            AbstractAccount depositAccount = bank.AddDepositAccount(client, _dateTimeProvider.Now);
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(depositAccount, 1));
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now);
+            var editor = new ClientEditor(client);
+            editor.ChangeAddress("address");
+            editor.ChangePassport("passport");
+            _centralBank.EditClient(editor);
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(depositAccount, bank, 1));
         }
         
         [Test]
         public void DepositWithdrawBeforeEndDate_InvalidOperationException()
         {
-            Bank bank = _centralBank.GetBank("Bank0");
-            Client client = bank.Clients.First();
-            ClientEditor.ChangePassport("passport", client);
-            ClientEditor.ChangeAddress("addres", client);
-            AbstractAccount depositAccount = bank.AddDepositAccount(client, _dateTimeProvider.Now.AddYears(5));
-            bank.Accrue(depositAccount, 1000);
-            Assert.Throws<InvalidOperationException>(() => bank.Withdraw(depositAccount, 100));
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            Client client = _centralBank.GetClients(bank).First();
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now.AddDays(1));
+            var editor = new ClientEditor(client);
+            editor.ChangeAddress("address");
+            editor.ChangePassport("passport");
+            _centralBank.EditClient(editor);
+            _centralBank.Accrue(depositAccount, bank, 1000);
+            Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(depositAccount, bank, 100));
         }
     }
 }

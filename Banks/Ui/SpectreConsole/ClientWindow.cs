@@ -22,7 +22,7 @@ namespace Banks.Ui.SpectreConsole
         {
             _bank = bank;
             _handler = handler;
-            _client = _handler.GetClient(clientId, _bank);
+            _client = _handler.GetClient(clientId);
             _run = false;
             _commands = new List<Command>(new[]
             {
@@ -87,7 +87,7 @@ namespace Banks.Ui.SpectreConsole
 
         private void ShowAccounts()
         {
-            IReadOnlyList<AbstractAccount> accounts = _handler.GetClientAccounts(_bank.Id, _client.Id);
+            IReadOnlyList<AbstractAccount> accounts = _handler.GetClientAccounts(_client);
             Table table = TableGenerator.GenerateTable(accounts);
             AnsiConsole.Write(table);
             Prompts.ReturnPrompt();

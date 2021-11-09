@@ -119,9 +119,8 @@ namespace Banks.Ui.SpectreConsole
                 }
             }
 
-            Client client = builder.Build();
-            Guid id = _handler.AddClient(_bank, client);
-            AnsiConsole.WriteLine($"[green]Client added with id: {id}[/]");
+            _handler.AddClient(_bank, builder);
+            AnsiConsole.WriteLine($"[green]Client added[/]");
             Prompts.ReturnPrompt();
         }
     }

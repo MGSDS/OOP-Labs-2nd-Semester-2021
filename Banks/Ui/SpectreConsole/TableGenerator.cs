@@ -21,11 +21,9 @@ namespace Banks.Ui.SpectreConsole
             var table = new Table();
             table.AddColumn("Id");
             table.AddColumn("Name");
-            table.AddColumn("Clients count");
-            table.AddColumn("Accounts count");
             foreach (Bank bank in banks)
             {
-                table.AddRow(bank.Id.ToString(), bank.Name, bank.Clients.Count.ToString(), bank.Accounts.Count.ToString());
+                table.AddRow(bank.Id.ToString(), bank.Name);
             }
 
             return table;
@@ -53,9 +51,13 @@ namespace Banks.Ui.SpectreConsole
             var table = new Table();
             table.AddColumn("Id");
             table.AddColumn("Name");
+            table.AddColumn("Surname");
+            table.AddColumn("Address");
+            table.AddColumn("Passport");
+            table.AddColumn("Verification");
             foreach (Client client in clients)
             {
-                table.AddRow(client.Id.ToString(), client.Name);
+                table.AddRow(client.Id.ToString(), client.Name, client.Surname, client.Address ?? "Not set", client.Passport ?? "Not set", client.Verified.ToString());
             }
 
             return table;

@@ -38,6 +38,6 @@ namespace Banks.Entities.Transactions
         public DateTime Time { get; internal init; }
 
         public abstract void Execute();
-        public abstract void Cancel();
+        internal abstract void Cancel();
     }
 }

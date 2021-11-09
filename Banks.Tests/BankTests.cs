@@ -15,14 +15,15 @@ namespace Banks.Tests
     {
         private IDateTimeProvider _dateTimeProvider;
         private CentralBank _centralBank;
+        private DatabaseRepository _databaseRepository;
 
         [SetUp]
         public void Setup()
         {
             _dateTimeProvider = new DateTimeProvider();
             var context = new BanksContext(_dateTimeProvider, "database.db");
-            var repositopry = new DatabaseRepository(context);
-            _centralBank = new CentralBank(repositopry);
+            _databaseRepository = new DatabaseRepository(context);
+            _centralBank = new CentralBank(_databaseRepository);
             _centralBank.RegisterBank(new Bank(_centralBank.TransactionsService,
                 _dateTimeProvider,
                 new CreditInfoProvider(100, 10),
@@ -35,81 +36,75 @@ namespace Banks.Tests
                     }),
                 new UnverifiedLimitProvider(10),
                 "Bank0"));
-            _centralBank.SaveChanges();
         }
         
         [TearDown]
         public void TearDown()
         {
-            _centralBank.DatabaseRepository.Context.Database.EnsureDeleted();
-            _centralBank.DatabaseRepository.Context.Dispose();
+            _databaseRepository.Context.Database.EnsureDeleted();
+            _databaseRepository.Context.Dispose();
         }
 
         [Test]
         public void AddClient_ClientAdded()
         {
             var client = new Client("surname", "name");
-            _centralBank.GetBank("Bank0").AddClient(client);
-            _centralBank.SaveChanges();
-            Bank result = _centralBank.GetBank("Bank0");
-            Assert.True(result.Clients.Contains(client));
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            _centralBank.RegisterClient(client, bank);
+            Assert.True(_centralBank.GetClients(bank).Contains(client));
         }
         
         [Test]
         public void AddSameClient_InvalidOperationException()
         {
             var client = new Client("surname", "name");
-            _centralBank.GetBank("Bank0").AddClient(client);
-            _centralBank.SaveChanges();
-            Assert.Throws<InvalidOperationException>(() => _centralBank.GetBank("Bank0").AddClient(client));
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            _centralBank.RegisterClient(client, bank);
+            Assert.Throws<InvalidOperationException>(() => _centralBank.RegisterClient(client, bank));
         }
 
         [Test]
         public void SubscribeClientAndChangeTerms_ClientNotified()
         {
             var client = new Client("surname", "name");
-            _centralBank.GetBank("Bank0").AddClient(client);
-            _centralBank.SaveChanges();
-            _centralBank.GetBank("Bank0").Subscribe(client);
-            _centralBank.SaveChanges();
-            Assert.Throws<NotImplementedException>(() =>
-                _centralBank.GetBank("Bank0").ChangeTerms(unverifiedLimit: new UnverifiedLimitProvider(100)));
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            _centralBank.RegisterClient(client, bank);
+            _centralBank.Subscribe(client, bank);
+            Assert.Throws<NotImplementedException>(() => _centralBank.ChangeTerms(bank));
         }
         
         [Test]
         public void createAccounts_AccountsCreated()
         {
             var client = new Client("surname", "name");
-            Bank bank = _centralBank.GetBank("Bank0");
-            bank.AddClient(client);
-            CreditAccount credit = bank.AddCreditAccount(client);
-            DebitAccount debit = bank.AddDebitAccount(client);
-            DepositAccount deposit = bank.AddDepositAccount(client, _dateTimeProvider.Now.AddDays(1));
-            _centralBank.SaveChanges();
-            Assert.True(_centralBank.GetBank("Bank0").Accounts.Contains(credit));
-            Assert.True(_centralBank.GetBank("Bank0").Accounts.Contains(debit));
-            Assert.True(_centralBank.GetBank("Bank0").Accounts.Contains(deposit));
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            _centralBank.RegisterClient(client, bank);
+            AbstractAccount creditAccount = _centralBank.AddCreditAccount(client, bank);
+            AbstractAccount debitAaccount = _centralBank.AddDebitAccount(client, bank);
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now.AddDays(1));
+            IReadOnlyList<AbstractAccount> accounts = _centralBank.GetAccounts(bank);
+            Assert.True(accounts.Contains(creditAccount));
+            Assert.True(accounts.Contains(debitAaccount));
+            Assert.True(accounts.Contains(depositAccount));
         }
 
         [Test]
         public void TransactionsTest()
         {
-            var client = new Client("surname", "name");
-            ClientEditor.ChangeAddress("address", client);
-            ClientEditor.ChangePassport("passport", client);
-            Bank bank = _centralBank.GetBank("Bank0");
-            bank.AddClient(client);
-            DebitAccount debit = bank.AddDebitAccount(client);
-            DebitAccount debit2 = bank.AddDebitAccount(client);
-            bank.Accrue(debit, 10000);
-            _centralBank.SaveChanges();
+            Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
+            var clientBuilder = new ClientBuilder();
+            clientBuilder.SetName("name", "surname");
+            clientBuilder.SetAddress("address");
+            clientBuilder.SetId("passport");
+            Client client = clientBuilder.Build();
+            _centralBank.RegisterClient(client, bank);
+            DebitAccount debit = _centralBank.AddDebitAccount(client, bank);
+            DebitAccount debit2 = _centralBank.AddDebitAccount(client, bank);
+            _centralBank.Accrue(debit, bank, 10000);
             Assert.AreEqual(debit.Balance, 10000);
-            bank.Withdraw(debit, 1000);
-            _centralBank.SaveChanges();
+            _centralBank.Withdraw(debit, bank, 1000);
             Assert.AreEqual(debit.Balance, 9000);
-            _centralBank.SaveChanges();
-            bank.Transfer(debit, debit2, 9000);
-            _centralBank.SaveChanges();
+            _centralBank.Transfer(debit, debit2, bank, 9000);
             Assert.AreEqual(debit.Balance, 0);
             Assert.AreEqual(debit2.Balance, 9000);
         }

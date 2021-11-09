@@ -35,7 +35,7 @@ namespace Banks.Entities.Transactions
             }
         }
 
-        public override void Cancel()
+        internal override void Cancel()
         {
             if (Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException("Transaction can not be canceled");

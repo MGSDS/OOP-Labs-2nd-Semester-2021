@@ -15,12 +15,12 @@ namespace Banks.Services
 
         public IReadOnlyList<AbstractTransaction> Transactions { get => _databaseRepository.Transactions; }
 
-        public void CancelTransaction(Guid transactionId)
+        public void Cancel(AbstractTransaction transaction)
         {
-            _databaseRepository.CancelTransaction(transactionId);
+            _databaseRepository.CancelTransaction(transaction);
         }
 
-        internal void AddTransaction(AbstractTransaction transaction)
+        internal void Add(AbstractTransaction transaction)
         {
             _databaseRepository.AddTransaction(transaction);
         }

@@ -1,63 +1,135 @@
 using System;
 using System.Collections.Generic;
+using Banks.Builders;
 using Banks.Database;
 using Banks.Entities.Accounts;
 using Banks.Entities.Transactions;
+using Banks.Providers;
 using Banks.Services;
 
 namespace Banks.Entities
 {
     public class CentralBank
     {
+        private DatabaseRepository _databaseRepository;
         public CentralBank(DatabaseRepository databaseRepository)
         {
-            DatabaseRepository = databaseRepository;
+            _databaseRepository = databaseRepository;
         }
 
-        public IReadOnlyList<Bank> Banks => DatabaseRepository.GetBankFull();
-        public DatabaseRepository DatabaseRepository { get; }
-        public TransactionsService TransactionsService { get => DatabaseRepository.TransactionsService; }
+        public IReadOnlyList<Bank> Banks => _databaseRepository.Banks;
+        public IReadOnlyList<AbstractAccount> Accounts => _databaseRepository.Accounts;
+        public IReadOnlyList<Client> Clients => _databaseRepository.Clients;
+        public TransactionsService TransactionsService { get => _databaseRepository.TransactionsService; }
 
         public void RegisterBank(Bank bank)
         {
-            DatabaseRepository.RegisterBank(bank);
+            _databaseRepository.RegisterBank(bank);
         }
 
-        public Bank GetBank(Guid bankId)
+        public AbstractAccount FindAccount(Guid id)
         {
-            return DatabaseRepository.GetBank(bankId);
+            return _databaseRepository.FindAccount(id);
         }
 
-        public Bank GetBank(string name)
+        public Client FindClient(Guid id)
         {
-            return DatabaseRepository.GetBank(name);
+            return _databaseRepository.FindClient(id);
         }
 
-        public IReadOnlyList<AbstractAccount> GetBankAccounts(Bank bank)
+        public Bank FindBank(Guid id)
         {
-            return DatabaseRepository.GetBankAccounts(bank);
+            return _databaseRepository.FindBank(id);
         }
 
-        public IReadOnlyList<AbstractTransaction> GetAccountTransactions(Guid accountId)
+        public AbstractTransaction FindTransaction(Guid id)
         {
-            return DatabaseRepository.GetAccountTransactions(accountId);
+            return _databaseRepository.FindTransaction(id);
         }
 
-        public IReadOnlyList<AbstractAccount> GetClientAccounts(Guid userId, Guid bankId)
+        public IReadOnlyList<Client> GetClients(Bank bank)
         {
-            return DatabaseRepository.GetClientAccounts(userId, bankId);
+            return _databaseRepository.GetBankClients(bank);
+        }
+
+        public IReadOnlyList<AbstractAccount> GetAccounts(Bank bank)
+        {
+            return _databaseRepository.GetBankAccounts(bank);
+        }
+
+        public IReadOnlyList<AbstractTransaction> GetTransactions(AbstractAccount account)
+        {
+            return _databaseRepository.GetAccountTransactions(account);
+        }
+
+        public IReadOnlyList<AbstractAccount> GetAccounts(Client client)
+        {
+            return _databaseRepository.GetClientAccounts(client);
         }
 
         public void NotifyBanks()
         {
-            foreach (Bank bank in Banks)
-                DatabaseRepository.GetBank(bank.Id).AccountsUpdate();
-            DatabaseRepository.SaveChanges();
+            _databaseRepository.NotifyBanks();
         }
 
-        public void SaveChanges()
+        public void RegisterClient(Client client, Bank bank)
         {
-            DatabaseRepository.SaveChanges();
+            _databaseRepository.RegisterClient(client, bank);
+        }
+
+        public void RegisterClient(ClientBuilder builder, Bank bank)
+        {
+            RegisterClient(builder.Build(), bank);
+        }
+
+        public DepositAccount AddDepositAccount(Client client, Bank bank, DateTime endDate)
+        {
+            return _databaseRepository.AddDepositAccount(client, bank, endDate);
+        }
+
+        public CreditAccount AddCreditAccount(Client client, Bank bank)
+        {
+            return _databaseRepository.AddCreditAccount(client, bank);
+        }
+
+        public DebitAccount AddDebitAccount(Client client, Bank bank)
+        {
+            return _databaseRepository.AddDebitAccount(client, bank);
+        }
+
+        public void Accrue(AbstractAccount account, Bank bank, decimal money)
+        {
+            _databaseRepository.Accrue(account, bank, money);
+        }
+
+        public void Transfer(AbstractAccount from, AbstractAccount to, Bank bank, decimal money)
+        {
+            _databaseRepository.Transfer(from, to, bank, money);
+        }
+
+        public void Withdraw(AbstractAccount account, Bank bank, decimal money)
+        {
+            _databaseRepository.Withdraw(account, bank, money);
+        }
+
+        public void Subscribe(Client client, Bank bank)
+        {
+            _databaseRepository.SubscribeClient(client, bank);
+        }
+
+        public void ChangeTerms(
+            Bank bank,
+            CreditInfoProvider creditInfoProvider = null,
+            DebitInterestProvider debitInterestProvider = null,
+            DepositInterestProvider depositInterestProvider = null,
+            UnverifiedLimitProvider unverifiedLimit = null)
+        {
+            _databaseRepository.ChangeTerms(bank, creditInfoProvider, debitInterestProvider, depositInterestProvider, unverifiedLimit);
+        }
+
+        public void EditClient(ClientEditor editor)
+        {
+            _databaseRepository.EditClient(editor);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Banks.Entities
             CreditInfoProvider creditInfoProvider,
             DebitInterestProvider debitInterestProvider,
             DepositInterestProvider depositInterestProvider,
-            UnverifiedLimitProvider unverifiedLimit,
+            UnverifiedLimitProvider unverifiedLimitProvider,
             string name)
         {
             Id = Guid.NewGuid();
@@ -32,7 +32,7 @@ namespace Banks.Entities
             CreditInfoProvider = creditInfoProvider;
             DebitInterestProvider = debitInterestProvider;
             DepositInterestProvider = depositInterestProvider;
-            UnverifiedLimit = unverifiedLimit;
+            UnverifiedLimitProvider = unverifiedLimitProvider;
             Name = name;
             TransactionsService = transactionsService;
             _subscribedClients = new List<Client>();
@@ -58,78 +58,78 @@ namespace Banks.Entities
         public CreditInfoProvider CreditInfoProvider { get; internal set; }
         public DebitInterestProvider DebitInterestProvider { get; internal set; }
         public DepositInterestProvider DepositInterestProvider { get; internal set; }
-        public UnverifiedLimitProvider UnverifiedLimit { get; internal set; }
+        public UnverifiedLimitProvider UnverifiedLimitProvider { get; internal set; }
 
-        public void AddClient(Client client)
+        internal void AddClient(Client client)
         {
             if (Clients.Any(x => x.Id == client.Id))
                 throw new InvalidOperationException("Such client is already added");
             _clients.Add(client);
         }
 
-        public DebitAccount AddDebitAccount(Client client)
+        internal DebitAccount AddDebitAccount(Client client)
         {
             CheckClientExists(client);
-            var account = new DebitAccount(client, UnverifiedLimit, DateTimeProvider, DebitInterestProvider);
+            var account = new DebitAccount(client, UnverifiedLimitProvider, DateTimeProvider, DebitInterestProvider);
             _accounts.Add(account);
             return account;
         }
 
-        public CreditAccount AddCreditAccount(Client client)
+        internal CreditAccount AddCreditAccount(Client client)
         {
             CheckClientExists(client);
-            var account = new CreditAccount(client, UnverifiedLimit, DateTimeProvider, CreditInfoProvider);
+            var account = new CreditAccount(client, UnverifiedLimitProvider, DateTimeProvider, CreditInfoProvider);
             _accounts.Add(account);
             return account;
         }
 
-        public DepositAccount AddDepositAccount(Client client, DateTime endDate)
+        internal DepositAccount AddDepositAccount(Client client, DateTime endDate)
         {
             CheckClientExists(client);
-            var account = new DepositAccount(client, UnverifiedLimit, DateTimeProvider, DepositInterestProvider, endDate);
+            var account = new DepositAccount(client, UnverifiedLimitProvider, DateTimeProvider, DepositInterestProvider, endDate);
             _accounts.Add(account);
             return account;
         }
 
-        public AbstractTransaction Withdraw(AbstractAccount account, decimal amount)
+        internal AbstractTransaction Withdraw(AbstractAccount account, decimal amount)
         {
             AbstractTransaction transaction = account.Withdraw(amount);
-            TransactionsService.AddTransaction(transaction);
+            TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException(transaction.ErrorMessage);
             return transaction;
         }
 
-        public AbstractTransaction Accrue(AbstractAccount account, decimal amount)
+        internal AbstractTransaction Accrue(AbstractAccount account, decimal amount)
         {
             AbstractTransaction transaction = account.Accrue(amount);
-            TransactionsService.AddTransaction(transaction);
+            TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException(transaction.ErrorMessage);
             return transaction;
         }
 
-        public AbstractTransaction Transfer(AbstractAccount from, AbstractAccount to, decimal amount)
+        internal AbstractTransaction Transfer(AbstractAccount from, AbstractAccount to, decimal amount)
         {
             AbstractTransaction transaction = from.Transfer(amount, to);
-            TransactionsService.AddTransaction(transaction);
+            TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException(transaction.ErrorMessage);
             return transaction;
         }
 
-        public void AccountsUpdate()
+        internal void AccountsUpdate()
         {
             foreach (AbstractAccount account in _accounts)
             {
                 AbstractTransaction transaction = account.Notify();
                 if (transaction.Status is not TransactionStatus.Successful)
                     throw new InvalidOperationException(transaction.ErrorMessage);
-                TransactionsService.AddTransaction(transaction);
+                TransactionsService.Add(transaction);
             }
         }
 
-        public void Subscribe(Client client)
+        internal void Subscribe(Client client)
         {
             if (!_clients.Contains(client))
                 throw new InvalidOperationException("client is not registered");
@@ -138,11 +138,11 @@ namespace Banks.Entities
             _subscribedClients.Add(client);
         }
 
-        public void ChangeTerms(
+        internal void ChangeTerms(
             CreditInfoProvider creditInfoProvider = null,
             DebitInterestProvider debitInterestProvider = null,
             DepositInterestProvider depositInterestProvider = null,
-            UnverifiedLimitProvider unverifiedLimit = null)
+            UnverifiedLimitProvider unverifiedLimitProvider = null)
         {
             if (creditInfoProvider is not null)
                 CreditInfoProvider = creditInfoProvider;
@@ -150,8 +150,8 @@ namespace Banks.Entities
                 DebitInterestProvider = debitInterestProvider;
             if (depositInterestProvider is not null)
                 DepositInterestProvider = depositInterestProvider;
-            if (unverifiedLimit is not null)
-                UnverifiedLimit = unverifiedLimit;
+            if (unverifiedLimitProvider is not null)
+                UnverifiedLimitProvider = unverifiedLimitProvider;
             foreach (Client subscribedClient in _subscribedClients)
                 subscribedClient.Notify();
         }

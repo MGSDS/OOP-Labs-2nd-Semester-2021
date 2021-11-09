@@ -14,7 +14,7 @@ namespace Banks.Entities.Transactions
         {
         }
 
-        public override void Cancel()
+        internal override void Cancel()
         {
             throw new InvalidOperationException("Interest accrue transaction can not be canceled");
         }

@@ -20,7 +20,7 @@ namespace Banks.Ui.SpectreConsole
         {
             _handler = handler;
             _bank = bank;
-            _account = _handler.GetAccount(bank, accountId);
+            _account = _handler.GetAccount(accountId);
             _run = false;
             _commands = new List<Command>(new[]
             {
@@ -69,10 +69,9 @@ namespace Banks.Ui.SpectreConsole
 
         private void Transfer()
         {
-            Guid destinationBankId = AnsiConsole.Ask<Guid>("Enter [green]destination bank id[/]");
             Guid destinationAccountId = AnsiConsole.Ask<Guid>("Enter [green]destination account id[/]");
             decimal amount = AskAmount();
-            _handler.Transfer(_account, _bank, destinationBankId, destinationAccountId, amount);
+            _handler.Transfer(_account, _bank, destinationAccountId, amount);
         }
 
         private void Withdraw()

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Banks.Builders;
 using Banks.Entities;
 using Banks.Entities.Accounts;
 using Banks.Entities.Transactions;
@@ -27,17 +27,17 @@ namespace Banks.Ui
 
         public Bank GetBank(Guid bankId)
         {
-            return _centralBank.GetBank(bankId);
+            return _centralBank.FindBank(bankId);
         }
 
         public IReadOnlyList<AbstractAccount> GetAccounts(Bank bank)
         {
-            return bank.Accounts;
+            return _centralBank.GetAccounts(bank);
         }
 
         public IReadOnlyList<Client> GetClients(Bank bank)
         {
-            return bank.Clients;
+            return _centralBank.GetClients(bank);
         }
 
         public IReadOnlyList<AbstractTransaction> GetTransactions()
@@ -47,18 +47,20 @@ namespace Banks.Ui
 
         public IReadOnlyList<AbstractTransaction> GetAccountTransactions(Guid accountId)
         {
-            return _centralBank.GetAccountTransactions(accountId);
+            AbstractAccount account = _centralBank.FindAccount(accountId);
+            return _centralBank.GetTransactions(account);
         }
 
-        public IReadOnlyList<AbstractAccount> GetUserAccounts(Guid userId, Guid bankId)
+        public IReadOnlyList<AbstractAccount> GetClientAccounts(Guid clientId)
         {
-            return _centralBank.GetClientAccounts(userId, bankId);
+            Client client = _centralBank.FindClient(clientId);
+            return _centralBank.GetAccounts(client);
         }
 
         public void CancelTransaction(Guid transactionId)
         {
-            _centralBank.TransactionsService.CancelTransaction(transactionId);
-            _centralBank.SaveChanges();
+            AbstractTransaction transaction = _centralBank.FindTransaction(transactionId);
+            _centralBank.TransactionsService.Cancel(transaction);
         }
 
         public Guid RegisterBank(
@@ -78,73 +80,66 @@ namespace Banks.Ui
                 new UnverifiedLimitProvider(unverifiedLimit),
                 name);
             _centralBank.RegisterBank(bank);
-            _centralBank.SaveChanges();
             return bank.Id;
         }
 
         public Guid AddClient(Bank bank, Client client)
         {
-            bank.AddClient(client);
-            _centralBank.SaveChanges();
+            _centralBank.RegisterClient(client, bank);
             return client.Id;
         }
 
-        public Client GetClient(Guid clientId, Bank bank)
+        public void AddClient(Bank bank, ClientBuilder builder)
         {
-            return bank.Clients.FirstOrDefault(client => client.Id == clientId);
+            _centralBank.RegisterClient(builder, bank);
+        }
+
+        public Client GetClient(Guid clientId)
+        {
+            return _centralBank.FindClient(clientId);
         }
 
         public Guid CreateCreditAccount(Client client, Bank bank)
         {
-            CreditAccount account = bank.AddCreditAccount(client);
-            _centralBank.SaveChanges();
+            CreditAccount account = _centralBank.AddCreditAccount(client, bank);
             return account.Id;
         }
 
         public Guid CreateDebitAccount(Client client, Bank bank)
         {
-            DebitAccount account = bank.AddDebitAccount(client);
-            _centralBank.SaveChanges();
+            DebitAccount account = _centralBank.AddDebitAccount(client, bank);
             return account.Id;
         }
 
         public Guid CreateDepositAccount(Client client, Bank bank, DateTime endDate)
         {
-            DepositAccount account = bank.AddDepositAccount(client, endDate);
-            _centralBank.SaveChanges();
+            DepositAccount account = _centralBank.AddDepositAccount(client, bank, endDate);
             return account.Id;
         }
 
-        public IReadOnlyList<AbstractAccount> GetClientAccounts(Bank bank, Client client)
+        public AbstractAccount GetAccount(Guid accountId)
         {
-            return _centralBank.GetBankAccounts(bank).Where(x => x.Client == client).ToList();
-        }
-
-        public AbstractAccount GetAccount(Bank bank, Guid accountId)
-        {
-            return bank.Accounts.FirstOrDefault(account => account.Id == accountId);
+            return _centralBank.FindAccount(accountId);
         }
 
         public void Accrue(Bank bank, AbstractAccount account, decimal amount)
         {
-            bank.Accrue(account, amount);
-            _centralBank.SaveChanges();
+            _centralBank.Accrue(account, bank, amount);
         }
 
         public void Withdraw(Bank bank, AbstractAccount account, decimal amount)
         {
-            bank.Withdraw(account, amount);
-            _centralBank.SaveChanges();
+             _centralBank.Withdraw(account, bank, amount);
         }
 
-        public void Transfer(AbstractAccount account, Bank bank, Guid destinationBankId, Guid destinationAccountId, decimal amount)
+        public void Transfer(AbstractAccount account, Bank bank, Guid destinationAccountId, decimal amount)
         {
-            bank.Transfer(account, GetBank(destinationBankId).Accounts.FirstOrDefault(x => x.Id == destinationAccountId), amount);
+            _centralBank.Transfer(account, _centralBank.FindAccount(destinationAccountId), bank, amount);
         }
 
-        public IReadOnlyList<AbstractAccount> GetClientAccounts(Guid userId, Guid bankId)
+        public IReadOnlyList<AbstractAccount> GetClientAccounts(Client client)
         {
-            return _centralBank.GetClientAccounts(userId, bankId);
+            return _centralBank.GetAccounts(client);
         }
     }
 }
