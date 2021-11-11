@@ -30,7 +30,7 @@ namespace Banks.Entities
 
         internal void Notify()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException($"Client with id {Id} notified, but notification logic is not implemented");
         }
     }
 }
