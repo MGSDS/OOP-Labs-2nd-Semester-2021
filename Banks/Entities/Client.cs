@@ -5,7 +5,7 @@ namespace Banks.Entities
 {
     public class Client
     {
-        public Client(string surname, string name)
+        public Client(string name, string surname)
         {
             Address = null;
             Passport = null;

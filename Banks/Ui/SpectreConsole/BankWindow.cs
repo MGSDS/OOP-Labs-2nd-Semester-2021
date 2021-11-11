@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Banks.Builders;
 using Banks.Entities;
-using Banks.Entities.Accounts;
 using Banks.Ui.Commands;
 using Banks.Ui.Interfaces;
 using Spectre.Console;
