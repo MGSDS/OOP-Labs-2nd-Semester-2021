@@ -6,7 +6,7 @@ namespace Banks.Ui
 {
     public static class UiRunner
     {
-        public static void Run(DateTimeProvider dateTimeProvider, CentralBank centralBank)
+        public static void Run(IDateTimeProvider dateTimeProvider, CentralBank centralBank)
         {
             var ui = new MainWindow(new CommandHandler(centralBank, dateTimeProvider));
             ui.Run();

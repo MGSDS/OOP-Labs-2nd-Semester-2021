@@ -14,7 +14,7 @@ namespace Banks.Ui
         private readonly CentralBank _centralBank;
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        public CommandHandler(CentralBank centralBank, DateTimeProvider dateTimeProvider)
+        public CommandHandler(CentralBank centralBank, IDateTimeProvider dateTimeProvider)
         {
             _centralBank = centralBank;
             _dateTimeProvider = dateTimeProvider;
