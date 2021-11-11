@@ -13,7 +13,7 @@ namespace Banks.Tests
 {
     public class AccountsTests
     {
-        private IDateTimeProvider _dateTimeProvider;
+        private DateTimeProvider _dateTimeProvider;
         private CentralBank _centralBank;
         private DatabaseRepository _databaseRepository;
 
