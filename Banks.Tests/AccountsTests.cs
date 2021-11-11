@@ -13,20 +13,20 @@ namespace Banks.Tests
 {
     public class AccountsTests
     {
-        private DateTimeProvider _dateTimeProvider;
+        private FakeDateTimeProvider _fakeDateTimeProvider;
         private CentralBank _centralBank;
         private DatabaseRepository _databaseRepository;
 
         [SetUp]
         public void Setup()
         {
-            _dateTimeProvider = new DateTimeProvider();
-            var context = new BanksContext(_dateTimeProvider, "database.db");
+            _fakeDateTimeProvider = new FakeDateTimeProvider();
+            var context = new BanksContext(_fakeDateTimeProvider, "database.db");
             _databaseRepository = new DatabaseRepository(context);
             _centralBank = new CentralBank(_databaseRepository);
             _centralBank.RegisterBank(
                 new Bank(_centralBank.TransactionsService,
-                _dateTimeProvider,
+                _fakeDateTimeProvider,
                 new CreditInfoProvider(100, 10),
                 new DebitInterestProvider(2),
                 new DepositInterestProvider(
@@ -56,7 +56,7 @@ namespace Banks.Tests
             Client client = _centralBank.GetClients(bank).First();
             AbstractAccount account = _centralBank.AddDebitAccount(client, bank);
             _centralBank.Accrue(account, bank, amount);
-            _dateTimeProvider.Now = _dateTimeProvider.Now.AddYears(1);
+            _fakeDateTimeProvider.Now = _fakeDateTimeProvider.Now.AddYears(1);
             _centralBank.NotifyBanks();
             Assert.AreEqual(amount * (1 + bank.DebitInterestProvider.Percentage / 100),decimal.Round(account.Balance, 3));
         }
@@ -70,7 +70,7 @@ namespace Banks.Tests
             Client client = _centralBank.GetClients(bank).First();
             AbstractAccount account = _centralBank.AddDepositAccount(client, bank, DateTime.Now);
             _centralBank.Accrue(account, bank, amount);
-            _dateTimeProvider.Now = _dateTimeProvider.Now.AddYears(1);
+            _fakeDateTimeProvider.Now = _fakeDateTimeProvider.Now.AddYears(1);
             _centralBank.NotifyBanks();
             decimal balance = amount;
             for (int i = 0; i < 365; ++i)
@@ -100,7 +100,7 @@ namespace Banks.Tests
             Client client = _centralBank.GetClients(bank).First();
             AbstractAccount creditAccount = _centralBank.AddCreditAccount(client, bank);
             AbstractAccount debitAaccount = _centralBank.AddDebitAccount(client, bank);
-            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now);
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _fakeDateTimeProvider.Now);
             creditAccount.Accrue(startBalance);
             debitAaccount.Accrue(startBalance);
             depositAccount.Accrue(startBalance);
@@ -146,7 +146,7 @@ namespace Banks.Tests
         {
             Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
             Client client = _centralBank.GetClients(bank).First();
-            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now);
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _fakeDateTimeProvider.Now);
             var editor = new ClientEditor(client);
             editor.ChangeAddress("address");
             editor.ChangePassport("passport");
@@ -159,7 +159,7 @@ namespace Banks.Tests
         {
             Bank bank = _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0");
             Client client = _centralBank.GetClients(bank).First();
-            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _dateTimeProvider.Now.AddDays(1));
+            AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _fakeDateTimeProvider.Now.AddDays(1));
             var editor = new ClientEditor(client);
             editor.ChangeAddress("address");
             editor.ChangePassport("passport");

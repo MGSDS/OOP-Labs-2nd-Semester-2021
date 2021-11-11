@@ -16,7 +16,7 @@ namespace Banks.Tests
         [SetUp]
         public void Setup()
         {
-            _dateTimeProvider = new DateTimeProvider();
+            _dateTimeProvider = new FakeDateTimeProvider();
             var context = new BanksContext(_dateTimeProvider, "database.db");
             _databaseRepository = new DatabaseRepository(context);
             _centralBank = new CentralBank(_databaseRepository);

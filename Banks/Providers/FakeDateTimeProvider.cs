@@ -2,9 +2,9 @@ using System;
 
 namespace Banks.Providers
 {
-    public class DateTimeProvider : IDateTimeProvider
+    public class FakeDateTimeProvider : IDateTimeProvider
     {
-        public DateTimeProvider()
+        public FakeDateTimeProvider()
         {
             Now = DateTime.Now;
         }
