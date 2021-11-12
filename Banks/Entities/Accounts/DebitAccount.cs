@@ -29,25 +29,25 @@ namespace Banks.Entities.Accounts
 
         public DateTime LastInterestAccrue { get; internal init; }
 
-        public override AbstractTransaction Accrue(decimal amount)
+        public override AbstractTransaction AccrueTransaction(decimal amount)
         {
-            AbstractTransaction transaction = base.Accrue(amount);
+            AbstractTransaction transaction = base.AccrueTransaction(amount);
             if (transaction.Status == TransactionStatus.Successful)
                 CalculateInterest();
             return transaction;
         }
 
-        public override AbstractTransaction Withdraw(decimal amount)
+        public override AbstractTransaction WithdrawTransaction(decimal amount)
         {
-            AbstractTransaction transaction = base.Withdraw(amount);
+            AbstractTransaction transaction = base.WithdrawTransaction(amount);
             if (transaction.Status == TransactionStatus.Successful)
                 CalculateInterest();
             return transaction;
         }
 
-        public override AbstractTransaction Transfer(decimal amount, AbstractAccount account)
+        public override AbstractTransaction TransferTransaction(decimal amount, AbstractAccount account)
         {
-            AbstractTransaction transaction = base.Transfer(amount, account);
+            AbstractTransaction transaction = base.TransferTransaction(amount, account);
             if (transaction.Status == TransactionStatus.Successful)
                 CalculateInterest();
             return transaction;
@@ -57,7 +57,6 @@ namespace Banks.Entities.Accounts
         {
             CalculateInterest();
             var transaction = new InterestAccrueTransaction(_notAccruedInterest, this, LastInterestAccrue.Date);
-            transaction.Execute();
             if (transaction.Status == TransactionStatus.Successful)
                 _notAccruedInterest = 0;
             return transaction;

@@ -93,7 +93,8 @@ namespace Banks.Entities
 
         internal AbstractTransaction Withdraw(AbstractAccount account, decimal amount)
         {
-            AbstractTransaction transaction = account.Withdraw(amount);
+            AbstractTransaction transaction = account.WithdrawTransaction(amount);
+            transaction.Execute();
             TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException(transaction.ErrorMessage);
@@ -102,7 +103,8 @@ namespace Banks.Entities
 
         internal AbstractTransaction Accrue(AbstractAccount account, decimal amount)
         {
-            AbstractTransaction transaction = account.Accrue(amount);
+            AbstractTransaction transaction = account.AccrueTransaction(amount);
+            transaction.Execute();
             TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException(transaction.ErrorMessage);
@@ -111,21 +113,23 @@ namespace Banks.Entities
 
         internal AbstractTransaction Transfer(AbstractAccount from, AbstractAccount to, decimal amount)
         {
-            AbstractTransaction transaction = from.Transfer(amount, to);
+            AbstractTransaction transaction = from.TransferTransaction(amount, to);
+            transaction.Execute();
             TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
                 throw new InvalidOperationException(transaction.ErrorMessage);
             return transaction;
         }
 
-        internal void AccountsUpdate()
+        internal void AccountsService()
         {
             foreach (AbstractAccount account in _accounts)
             {
-                AbstractTransaction transaction = account.Notify();
+                AbstractTransaction transaction = account.ServiceTransaction();
+                transaction.Execute();
+                TransactionsService.Add(transaction);
                 if (transaction.Status is not TransactionStatus.Successful)
                     throw new InvalidOperationException(transaction.ErrorMessage);
-                TransactionsService.Add(transaction);
             }
         }
 

@@ -101,9 +101,9 @@ namespace Banks.Tests
             AbstractAccount creditAccount = _centralBank.AddCreditAccount(client, bank);
             AbstractAccount debitAaccount = _centralBank.AddDebitAccount(client, bank);
             AbstractAccount depositAccount = _centralBank.AddDepositAccount(client, bank, _fakeDateTimeProvider.Now);
-            creditAccount.Accrue(startBalance);
-            debitAaccount.Accrue(startBalance);
-            depositAccount.Accrue(startBalance);
+            creditAccount.AccrueTransaction(startBalance);
+            debitAaccount.AccrueTransaction(startBalance);
+            depositAccount.AccrueTransaction(startBalance);
             Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(creditAccount, bank, withdraw));
             Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(debitAaccount, bank, withdraw));
             Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(depositAccount, bank, withdraw));

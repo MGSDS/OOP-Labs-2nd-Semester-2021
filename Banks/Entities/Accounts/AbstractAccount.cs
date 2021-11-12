@@ -30,24 +30,21 @@ namespace Banks.Entities.Accounts
         public decimal Balance { get => _balance; internal init => _balance = value; }
         public Client Client { get; internal init; }
 
-        public virtual AbstractTransaction Accrue(decimal amount)
+        public virtual AbstractTransaction AccrueTransaction(decimal amount)
         {
             var transaction = new AccrueTransaction(amount, this, DateTimeProvider.Now);
-            transaction.Execute();
             return transaction;
         }
 
-        public virtual AbstractTransaction Withdraw(decimal amount)
+        public virtual AbstractTransaction WithdrawTransaction(decimal amount)
         {
             var transaction = new WithdrawTransaction(amount, this, DateTimeProvider.Now);
-            transaction.Execute();
             return transaction;
         }
 
-        public virtual AbstractTransaction Transfer(decimal amount, AbstractAccount account)
+        public virtual AbstractTransaction TransferTransaction(decimal amount, AbstractAccount account)
         {
             var transaction = new TransferTransaction(amount, this, account, DateTimeProvider.Now);
-            transaction.Execute();
             return transaction;
         }
 

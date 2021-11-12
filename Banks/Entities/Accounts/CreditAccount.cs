@@ -26,7 +26,6 @@ namespace Banks.Entities.Accounts
             if (Balance < 0)
                 commission = CreditInfo.Commission;
             var transaction = new CommissionTransaction(commission,  this, DateTimeProvider.Now);
-            transaction.Execute();
             return transaction;
         }
 
