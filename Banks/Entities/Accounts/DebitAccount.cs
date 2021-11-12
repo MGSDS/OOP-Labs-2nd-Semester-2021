@@ -53,7 +53,7 @@ namespace Banks.Entities.Accounts
             return transaction;
         }
 
-        internal override AbstractTransaction Notify()
+        internal override AbstractTransaction ServiceTransaction()
         {
             CalculateInterest();
             var transaction = new InterestAccrueTransaction(_notAccruedInterest, this, LastInterestAccrue.Date);

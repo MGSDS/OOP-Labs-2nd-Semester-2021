@@ -56,7 +56,7 @@ namespace Banks.Entities.Accounts
         internal void IncreaseBalance(decimal amount)
             => _balance += amount;
 
-        internal abstract AbstractTransaction Notify();
+        internal abstract AbstractTransaction ServiceTransaction();
 
         internal virtual void DecreaseBalance(decimal amount)
         {

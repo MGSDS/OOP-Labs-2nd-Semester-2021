@@ -202,7 +202,7 @@ namespace Banks.Database
                 .ThenInclude(x => (x as DepositAccount).InterestProvider)
                 .ToList();
             foreach (Bank bank in banks)
-                bank.AccountsUpdate();
+                bank.AccountsService();
             Context.SaveChanges();
         }
 
