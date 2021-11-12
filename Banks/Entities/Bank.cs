@@ -93,7 +93,7 @@ namespace Banks.Entities
 
         internal AbstractTransaction Withdraw(AbstractAccount account, decimal amount)
         {
-            AbstractTransaction transaction = account.WithdrawTransaction(amount);
+            AbstractTransaction transaction = account.CreateWithdrawTransaction(amount);
             transaction.Execute();
             TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
@@ -103,7 +103,7 @@ namespace Banks.Entities
 
         internal AbstractTransaction Accrue(AbstractAccount account, decimal amount)
         {
-            AbstractTransaction transaction = account.AccrueTransaction(amount);
+            AbstractTransaction transaction = account.CreateAccrueTransaction(amount);
             transaction.Execute();
             TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
@@ -113,7 +113,7 @@ namespace Banks.Entities
 
         internal AbstractTransaction Transfer(AbstractAccount from, AbstractAccount to, decimal amount)
         {
-            AbstractTransaction transaction = from.TransferTransaction(amount, to);
+            AbstractTransaction transaction = from.CreateTransferTransaction(amount, to);
             transaction.Execute();
             TransactionsService.Add(transaction);
             if (transaction.Status is not TransactionStatus.Successful)
@@ -121,11 +121,11 @@ namespace Banks.Entities
             return transaction;
         }
 
-        internal void AccountsService()
+        internal void ServiceAccounts()
         {
             foreach (AbstractAccount account in _accounts)
             {
-                AbstractTransaction transaction = account.ServiceTransaction();
+                AbstractTransaction transaction = account.CreateServiceTransaction();
                 transaction.Execute();
                 TransactionsService.Add(transaction);
                 if (transaction.Status is not TransactionStatus.Successful)

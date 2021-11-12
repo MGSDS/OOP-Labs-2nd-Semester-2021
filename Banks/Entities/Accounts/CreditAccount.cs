@@ -20,7 +20,7 @@ namespace Banks.Entities.Accounts
 
         public CreditInfoProvider CreditInfo { get; init; }
 
-        internal override AbstractTransaction ServiceTransaction()
+        internal override AbstractTransaction CreateServiceTransaction()
         {
             decimal commission = 0;
             if (Balance < 0)
