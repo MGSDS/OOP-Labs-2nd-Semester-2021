@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using Banks.Entities.Accounts;
 
 namespace Banks.Entities.Transactions

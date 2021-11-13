@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using Banks.Entities.Accounts;
 
 namespace Banks.Entities.Transactions

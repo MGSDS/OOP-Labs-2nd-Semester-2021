@@ -2,7 +2,6 @@
 using Banks.Entities;
 using Banks.Providers;
 using Banks.Ui;
-using Banks.Ui.SpectreConsole;
 
 namespace Banks
 {
