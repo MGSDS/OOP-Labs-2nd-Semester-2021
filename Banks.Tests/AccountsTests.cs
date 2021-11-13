@@ -7,6 +7,7 @@ using Banks.Entities;
 using Banks.Entities.Accounts;
 using Banks.Entities.Transactions;
 using Banks.Providers;
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 
 namespace Banks.Tests
@@ -21,7 +22,9 @@ namespace Banks.Tests
         public void Setup()
         {
             _fakeDateTimeProvider = new FakeDateTimeProvider();
-            var context = new BanksContext(_fakeDateTimeProvider, "database.db");
+            var optionsBuilder = new DbContextOptionsBuilder();
+            optionsBuilder.UseSqlite($@"DataSource=database.db;");
+            var context = new BanksContext(optionsBuilder.Options ,_fakeDateTimeProvider);
             _databaseRepository = new DatabaseRepository(context);
             _centralBank = new CentralBank(_databaseRepository);
             _centralBank.RegisterBank(
@@ -40,14 +43,14 @@ namespace Banks.Tests
             var client = new Client("surname", "name");
             _centralBank.RegisterClient(client, _centralBank.Banks.FirstOrDefault(x => x.Name == "Bank0"));
         }
-        
+
         [TearDown]
         public void TearDown()
         {
             _databaseRepository.Context.Database.EnsureDeleted();
             _databaseRepository.Context.Dispose();
         }
-        
+
         [Test]
         [TestCase(100)]
         public void DebitAccountPerecentageAccrue_BalanceChanged(decimal amount)
@@ -60,7 +63,7 @@ namespace Banks.Tests
             _centralBank.NotifyBanks();
             Assert.AreEqual(amount * (1 + bank.DebitInterestProvider.Percentage / 100),decimal.Round(account.Balance, 3));
         }
-        
+
         [Test]
         [TestCase(100)]
         [TestCase(95)]
@@ -77,7 +80,7 @@ namespace Banks.Tests
                 balance += bank.DepositInterestProvider.GetMultiplier(balance) * balance;
             Assert.AreEqual(decimal.Round(balance,3 ),decimal.Round(account.Balance, 3));
         }
-        
+
         [Test]
         public void CreditAccountCommissionHold_BalanceDecrease()
         {
@@ -90,7 +93,7 @@ namespace Banks.Tests
             _centralBank.NotifyBanks();
             Assert.AreEqual(-15,decimal.Round(account.Balance, 3));
         }
-        
+
         [Test]
         [TestCase(1000,500)]
         [TestCase(10000,100)]
@@ -143,7 +146,7 @@ namespace Banks.Tests
             _centralBank.EditClient(editor);
             Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(debitAccount, bank, 101));
         }
-        
+
         [Test]
         public void DepositBelowZero_InvalidOperationException()
         {
@@ -156,7 +159,7 @@ namespace Banks.Tests
             _centralBank.EditClient(editor);
             Assert.Throws<InvalidOperationException>(() => _centralBank.Withdraw(depositAccount, bank, 1));
         }
-        
+
         [Test]
         public void DepositWithdrawBeforeEndDate_InvalidOperationException()
         {

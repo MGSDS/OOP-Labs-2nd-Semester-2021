@@ -5,6 +5,7 @@ using Banks.Entities;
 using Banks.Entities.Accounts;
 using Banks.Entities.Transactions;
 using Banks.Providers;
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 
 namespace Banks.Tests
@@ -19,7 +20,9 @@ namespace Banks.Tests
         public void Setup()
         {
             _dateTimeProvider = new FakeDateTimeProvider();
-            var context = new BanksContext(_dateTimeProvider, "database.db");
+            var optionsBuilder = new DbContextOptionsBuilder();
+            optionsBuilder.UseSqlite($@"DataSource=database.db;");
+            var context = new BanksContext(optionsBuilder.Options ,_dateTimeProvider);
             _repository = new DatabaseRepository(context);
             _centralBank = new CentralBank(_repository);
             _centralBank.RegisterBank(new Bank(_centralBank.TransactionsService,
@@ -69,7 +72,7 @@ namespace Banks.Tests
             Assert.AreEqual(1000, debit.Balance);
             Assert.AreEqual(TransactionStatus.Canceled, transaction.Status);
         }
-        
+
         [Test]
         public void TransferTransactionCancel_TransactionCanceled()
         {

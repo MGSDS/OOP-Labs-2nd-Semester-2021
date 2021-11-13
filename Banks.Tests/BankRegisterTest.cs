@@ -3,6 +3,7 @@ using System.Linq;
 using Banks.Database;
 using Banks.Entities;
 using Banks.Providers;
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 
 namespace Banks.Tests
@@ -17,11 +18,13 @@ namespace Banks.Tests
         public void Setup()
         {
             _dateTimeProvider = new FakeDateTimeProvider();
-            var context = new BanksContext(_dateTimeProvider, "database.db");
+            var optionsBuilder = new DbContextOptionsBuilder();
+            optionsBuilder.UseSqlite($@"DataSource=database.db;");
+            var context = new BanksContext(optionsBuilder.Options ,_dateTimeProvider);
             _databaseRepository = new DatabaseRepository(context);
             _centralBank = new CentralBank(_databaseRepository);
         }
-        
+
         [TearDown]
         public void TearDown()
         {

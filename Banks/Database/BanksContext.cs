@@ -9,21 +9,17 @@ namespace Banks.Database
 {
     public class BanksContext : DbContext
     {
-        public BanksContext(IDateTimeProvider dateTimeProvider, string pathToDatabase)
+        public BanksContext(DbContextOptions options, IDateTimeProvider dateTimeProvider)
+        : base(options)
         {
             DateTimeProvider = dateTimeProvider;
-            PathToDatabase = pathToDatabase;
             Database.EnsureCreated();
         }
 
-        public string PathToDatabase { get; }
         public TransactionsService TransactionsService { get; set; }
         public IDateTimeProvider DateTimeProvider { get; set; }
         public DbSet<Bank> Banks { get; set; }
         public DbSet<AbstractTransaction> Transactions { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseSqlite($@"DataSource={PathToDatabase};");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
