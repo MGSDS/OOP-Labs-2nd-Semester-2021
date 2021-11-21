@@ -22,4 +22,12 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Backups\Backups.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ExtensionMethods" />
+  </ItemGroup>
+
 </Project>

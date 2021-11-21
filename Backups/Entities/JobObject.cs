@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace Backups.Entities
 {
@@ -21,5 +22,6 @@ namespace Backups.Entities
         public string Name { get; }
 
         public string Path { get; }
+        public string FullPath => System.IO.Path.Combine(Path, Name);
     }
 }

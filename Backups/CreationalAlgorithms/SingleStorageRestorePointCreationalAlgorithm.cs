@@ -12,7 +12,7 @@ namespace Backups.CreationalAlgorithms
             if (objects == null) throw new ArgumentNullException(nameof(objects));
             if (repository == null) throw new ArgumentNullException(nameof(repository));
             Storage storage = repository.CreateStorage(objects);
-            return new RestorePoint(new List<Storage> { storage }, DateTime.Now, storage.Id);
+            return new RestorePoint(new List<Storage> { storage }, DateTime.Now, storage.Id, string.Empty);
         }
     }
 }

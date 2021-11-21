@@ -10,14 +10,12 @@ namespace Backups.Entities
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Path = path ?? throw new ArgumentNullException(nameof(path));
             Id = id;
-            JobObjects = jobObjects ?? throw new ArgumentNullException(nameof(jobObjects));
+            JobObjects = (List<JobObject>)(jobObjects ?? throw new ArgumentNullException(nameof(jobObjects)));
         }
 
         public string Name { get; }
-
         public string Path { get; }
-
-        public IReadOnlyList<JobObject> JobObjects { get; }
+        public List<JobObject> JobObjects { get; }
 
         public Guid Id { get; }
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backups.CompressionAlgorithms;
 using Backups.CreationalAlgorithms;
 using Backups.Entities;
 using Backups.Repositories;
@@ -26,8 +27,7 @@ namespace Backups.Tests
         public void
             CreateMultipleFileStorageJobAdd2FilesCreateRestorePointAdd1FileCreateRestorePoint_Created2RestorePointsAnd3Storages()
         {
-            var joba = new BackupJob(new Backup(), _repository.Object, new List<JobObject>(),
-                new SplitStorageRestorePointCreationalAlgorithm());
+            var joba = new BackupJob(new Backup(new SplitStorageRestorePointCreationalAlgorithm(), new ZipCompressor(), _repository.Object), new List<JobObject>());
             joba.AddObject(new JobObject("awesome path", "awesome name"));
             joba.AddObject(new JobObject("awesome path", "awesome name2"));
             joba.AddObject(new JobObject("awesome path", "awesome name3"));

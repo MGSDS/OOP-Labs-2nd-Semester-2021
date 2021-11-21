@@ -6,14 +6,16 @@ namespace Backups.Entities
 {
     public class RestorePoint
     {
-        public RestorePoint(IReadOnlyList<Storage> storages, DateTime backupTime, Guid id)
+        public RestorePoint(IReadOnlyList<Storage> storages, DateTime backupTime, Guid id, string path)
         {
-            Storages = storages ?? throw new ArgumentNullException(nameof(storages));
+            Storages = (List<Storage>)(storages ?? throw new ArgumentNullException(nameof(storages)));
             BackupTime = backupTime;
+            Path = path;
             Id = id;
         }
 
-        public IReadOnlyList<Storage> Storages { get; }
+        public string Path { get; }
+        public List<Storage> Storages { get; }
         public Guid Id { get; }
         public DateTime BackupTime { get; }
     }

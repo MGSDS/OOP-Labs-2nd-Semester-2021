@@ -31,7 +31,7 @@ namespace Backups.Repositories
             _compressor.Compress(jobObjects, mem);
             var files = new List<TransferFile> { new TransferFile(name, mem) };
             _client.SendFiles(files, folderName);
-            return new Storage(name, Path.Combine(":SERVER:", folderName), id, jobObjects);
+            return new Storage(name, folderName, id, jobObjects);
         }
 
         public void Dispose()

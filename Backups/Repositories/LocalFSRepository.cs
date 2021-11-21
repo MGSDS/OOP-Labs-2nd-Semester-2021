@@ -9,19 +9,20 @@ namespace Backups.Repositories
 {
     public class LocalFsRepository : IRepository
     {
-        private readonly ICompressor _compressor;
-        private readonly string _repositoryPath;
         public LocalFsRepository(string repositoryPath, ICompressor compressionAlg)
         {
             if (compressionAlg == null) throw new ArgumentNullException(nameof(compressionAlg));
-            _repositoryPath = repositoryPath ?? throw new ArgumentNullException(nameof(repositoryPath));
-            if (!Directory.Exists(_repositoryPath))
+            RepositoryPath = repositoryPath ?? throw new ArgumentNullException(nameof(repositoryPath));
+            if (!Directory.Exists(RepositoryPath))
             {
-                Directory.CreateDirectory(_repositoryPath);
+                Directory.CreateDirectory(RepositoryPath);
             }
 
-            _compressor = compressionAlg;
+            Compressor = compressionAlg;
         }
+
+        public ICompressor Compressor { get; }
+        public string RepositoryPath { get; }
 
         public Storage CreateStorage(IReadOnlyList<JobObject> jobObjects, string folderName = "")
         {
@@ -30,17 +31,17 @@ namespace Backups.Repositories
             string path = OpenDirectory(folderName);
             var id = Guid.NewGuid();
             string newFileName = $"{id.ToString()}.zip";
-            FileStream stream = OpenFile(Path.Combine(Path.Combine(path, folderName), newFileName));
-            _compressor.Compress(jobObjects, stream);
+            FileStream stream = OpenFile(Path.Combine(path, newFileName));
+            Compressor.Compress(jobObjects, stream);
             stream.Close();
-            return new Storage(newFileName, path, id, jobObjects);
+            return new Storage(newFileName, folderName, id, jobObjects);
         }
 
         private string OpenDirectory(string folderName)
         {
             if (folderName == null) throw new ArgumentNullException(nameof(folderName));
-            string path = Path.Combine(_repositoryPath, folderName);
-            if (!Directory.Exists(Path.Combine(_repositoryPath, folderName)))
+            string path = Path.Combine(RepositoryPath, folderName);
+            if (!Directory.Exists(Path.Combine(RepositoryPath, folderName)))
                 Directory.CreateDirectory(path);
             return path;
         }

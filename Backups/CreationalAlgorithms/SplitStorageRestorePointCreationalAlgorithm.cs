@@ -14,7 +14,7 @@ namespace Backups.CreationalAlgorithms
             if (repository == null) throw new ArgumentNullException(nameof(repository));
             var id = Guid.NewGuid();
             IReadOnlyList<Storage> storages = objects.Select(jobObject => repository.CreateStorage(new List<JobObject> { jobObject }, id.ToString())).ToList();
-            return new RestorePoint(storages, DateTime.Now, id);
+            return new RestorePoint(storages, DateTime.Now, id, id.ToString());
         }
     }
 }

@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Backups.CompressionAlgorithms;
+using Backups.CreationalAlgorithms;
+using Backups.Repositories;
 
 namespace Backups.Entities
 {
@@ -7,17 +10,29 @@ namespace Backups.Entities
     {
         private List<RestorePoint> _restorePoints;
 
-        public Backup()
+        public Backup(IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm, ICompressor compressor, IRepository repository)
         {
+            RestorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
+            Compressor = compressor;
+            Repository = repository;
             _restorePoints = new List<RestorePoint>();
         }
 
         public IReadOnlyList<RestorePoint> RestorePoints => _restorePoints;
+        public IRestorePointCreationalAlgorithm RestorePointCreationalAlgorithm { get; }
+        public ICompressor Compressor { get; }
+        public IRepository Repository { get; }
 
-        public void AddRestorePoint(RestorePoint restorePoint)
+        public void Add(RestorePoint restorePoint)
         {
             if (restorePoint == null) throw new ArgumentNullException(nameof(restorePoint));
             _restorePoints.Add(restorePoint);
+        }
+
+        protected internal void Remove(RestorePoint restorePoint)
+        {
+            if (restorePoint == null) throw new ArgumentNullException(nameof(restorePoint));
+            _restorePoints.Remove(restorePoint);
         }
     }
 }
