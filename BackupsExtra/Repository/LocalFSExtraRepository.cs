@@ -2,13 +2,15 @@ using System.IO;
 using Backups.CompressionAlgorithms;
 using Backups.Entities;
 using Backups.Repositories;
+using Newtonsoft.Json;
 
 namespace BackupsExtra.Repository
 {
     public class LocalFsExtraRepository : LocalFsRepository, IExtraRepository
     {
-        public LocalFsExtraRepository(string repositoryPath, ICompressor compressionAlg)
-            : base(repositoryPath, compressionAlg)
+        [JsonConstructor]
+        public LocalFsExtraRepository(string repositoryPath)
+            : base(repositoryPath)
         {
         }
 

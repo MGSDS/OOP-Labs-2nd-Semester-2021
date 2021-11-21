@@ -9,22 +9,18 @@ namespace Backups.Repositories
 {
     public class LocalFsRepository : IRepository
     {
-        public LocalFsRepository(string repositoryPath, ICompressor compressionAlg)
+        public LocalFsRepository(string repositoryPath)
         {
-            if (compressionAlg == null) throw new ArgumentNullException(nameof(compressionAlg));
             RepositoryPath = repositoryPath ?? throw new ArgumentNullException(nameof(repositoryPath));
             if (!Directory.Exists(RepositoryPath))
             {
                 Directory.CreateDirectory(RepositoryPath);
             }
-
-            Compressor = compressionAlg;
         }
 
-        public ICompressor Compressor { get; }
         public string RepositoryPath { get; }
 
-        public Storage CreateStorage(IReadOnlyList<JobObject> jobObjects, string folderName = "")
+        public Storage CreateStorage(List<JobObject> jobObjects, ICompressor compressor, string folderName = "")
         {
             if (jobObjects == null) throw new ArgumentNullException(nameof(jobObjects));
             if (folderName == null) throw new ArgumentNullException(nameof(folderName));
@@ -32,7 +28,7 @@ namespace Backups.Repositories
             var id = Guid.NewGuid();
             string newFileName = $"{id.ToString()}.zip";
             FileStream stream = OpenFile(Path.Combine(path, newFileName));
-            Compressor.Compress(jobObjects, stream);
+            compressor.Compress(jobObjects, stream);
             stream.Close();
             return new Storage(newFileName, folderName, id, jobObjects);
         }

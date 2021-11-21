@@ -1,14 +1,26 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Backups.Entities;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Repository;
+using Newtonsoft.Json;
 
 namespace BackupsExtra.Entities
 {
     public class ExtraBackup : Backup
     {
+        [JsonConstructor]
+        public ExtraBackup(
+            IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
+            IExtraCompressor compressor,
+            IExtraRepository repository,
+            List<RestorePoint> restorePoints)
+            : base(restorePointCreationalAlgorithm, compressor, repository, restorePoints)
+        {
+        }
+
         public ExtraBackup(IRestorePointManageAlgorithm restorePointCreationalAlgorithm, IExtraCompressor compressor, IExtraRepository repository)
             : base(restorePointCreationalAlgorithm, compressor, repository)
         {

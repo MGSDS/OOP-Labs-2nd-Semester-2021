@@ -10,7 +10,7 @@ namespace Backups
     {
         private static void Main()
         {
-            var repository = new TcpRepository(IPAddress.Parse("127.0.0.1"), 1234, new ZipCompressor());
+            var repository = new TcpRepository(IPAddress.Parse("127.0.0.1"), 1234);
             var algo = new SplitStorageRestorePointCreationalAlgorithm();
             var backup = new Backup(algo, new ZipCompressor(), repository);
             var joba = new BackupJob(backup);

@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Backups.CreationalAlgorithms;
-using Backups.Repositories;
+using Newtonsoft.Json;
 
 namespace Backups.Entities
 {
@@ -10,6 +9,7 @@ namespace Backups.Entities
     {
         private List<JobObject> _jobObjects;
 
+        [JsonConstructor]
         public BackupJob(Backup backup, List<JobObject> jobObjects)
         {
             Backup = backup ?? throw new ArgumentNullException(nameof(backup));
@@ -33,7 +33,7 @@ namespace Backups.Entities
 
         public void CreateRestorePoint()
         {
-            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.Repository));
+            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.Repository, Backup.Compressor));
         }
     }
 }

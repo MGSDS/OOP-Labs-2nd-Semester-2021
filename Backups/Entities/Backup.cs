@@ -8,17 +8,22 @@ namespace Backups.Entities
 {
     public class Backup
     {
-        private List<RestorePoint> _restorePoints;
-
+        private readonly List<RestorePoint> _restorePoints;
         public Backup(IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm, ICompressor compressor, IRepository repository)
+        : this(restorePointCreationalAlgorithm, compressor, repository, new List<RestorePoint>())
+        {
+        }
+
+        protected internal Backup(IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm, ICompressor compressor, IRepository repository, IReadOnlyList<RestorePoint> restorePoints)
         {
             RestorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
             Compressor = compressor;
             Repository = repository;
-            _restorePoints = new List<RestorePoint>();
+            _restorePoints = restorePoints as List<RestorePoint>;
         }
 
         public IReadOnlyList<RestorePoint> RestorePoints => _restorePoints;
+
         public IRestorePointCreationalAlgorithm RestorePointCreationalAlgorithm { get; }
         public ICompressor Compressor { get; }
         public IRepository Repository { get; }

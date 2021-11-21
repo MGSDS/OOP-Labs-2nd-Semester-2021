@@ -18,8 +18,8 @@ namespace Backups.Tests
         public void SetUp()
         {
             _repository = new Mock<IRepository>();
-            _repository.Setup(a => a.CreateStorage(It.IsAny<IReadOnlyList<JobObject>>(), It.IsAny<string>()))
-                .Returns((List<JobObject> x, string y) =>
+            _repository.Setup(a => a.CreateStorage(It.IsAny<List<JobObject>>(), new ZipCompressor(), It.IsAny<string>()))
+                .Returns((List<JobObject> x, ICompressor z, string y) =>
                     new Storage("Awesome Name", y, Guid.NewGuid(), x));
         }
 

@@ -5,12 +5,12 @@ namespace Backups.Entities
 {
     public class Storage
     {
-        public Storage(string name, string path, Guid id, IReadOnlyList<JobObject> jobObjects)
+        public Storage(string name, string path, Guid id, List<JobObject> jobObjects)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Path = path ?? throw new ArgumentNullException(nameof(path));
             Id = id;
-            JobObjects = (List<JobObject>)(jobObjects ?? throw new ArgumentNullException(nameof(jobObjects)));
+            JobObjects = jobObjects;
         }
 
         public string Name { get; }
