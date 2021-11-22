@@ -5,6 +5,7 @@ using Backups.Entities;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Repository;
+using BackupsExtra.RestoreAlgorithm;
 using Newtonsoft.Json;
 
 namespace BackupsExtra.Entities
@@ -51,6 +52,17 @@ namespace BackupsExtra.Entities
                                           ?? throw new ArgumentException($"Restore point with id {id} not found");
             (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Delete(restorePoint, Repository as IExtraRepository);
             Remove(restorePoint);
+        }
+
+        public void Restore(Guid pointId, IRestoreAlgorithm restoreAlgorithm)
+        {
+            RestorePoint restorePoint = RestorePoints.FirstOrDefault(x => x.Id == pointId)
+                                        ?? throw new ArgumentException($"Restore point with id {pointId} not found");
+            restoreAlgorithm.Restore(
+                restorePoint,
+                RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
+                Repository as IExtraRepository,
+                Compressor as IExtraCompressor);
         }
     }
 }

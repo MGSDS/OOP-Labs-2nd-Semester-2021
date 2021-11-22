@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
-using Backups.Entities;
-using BackupsExtra.Entities;
 using Newtonsoft.Json;
 
 namespace BackupsExtra
 {
-    public class JsonWrapper
+    public static class JsonWrapper
     {
         public static void WriteJson<T>(string filePath, List<T> backups)
         {

@@ -1,35 +1,47 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
-using Backups.CompressionAlgorithms;
-using Backups.CreationalAlgorithms;
 using Backups.Entities;
-using Backups.Repositories;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Entities;
 using BackupsExtra.Repository;
+using BackupsExtra.RestoreAlgorithm;
 
 namespace BackupsExtra
 {
-    internal class Program
+    internal static class Program
     {
         private static void Main()
         {
-            var algo = new SplitStorageRestorePointManageAlgorithm();
-            var compressionAlgo = new ExtraZipCompressor();
-            var repository = new LocalFsExtraRepository("/Users/bill/Desktop/backup", compressionAlgo);
-            var backup = new ExtraBackup(algo, compressionAlgo, repository);
-            var joba = new BackupJob(backup);
-            string path = "/Users/bill/Desktop";
-            joba.AddObject(new JobObject(path, "Screenshot 2021-11-21 at 5.10.05 PM.png"));
-            joba.CreateRestorePoint();
-            Guid first = backup.RestorePoints.Last().Id;
-            joba.RemoveObject(joba.JobObjects.First());
-            joba.AddObject(new JobObject(path, "Screenshot 2021-11-21 at 5.10.00 PM.png"));
-            joba.CreateRestorePoint();
-            Guid second = backup.RestorePoints.Last().Id;
-            backup.MergeRestorePoints(first, second);
+            // var algo = new SplitStorageRestorePointManageAlgorithm();
+            // var compressionAlgo = new ExtraZipCompressor();
+            // var repository = new LocalFsExtraRepository("/Users/bill/Desktop/backup");
+            // var backup = new ExtraBackup(algo, compressionAlgo, repository);
+            // var joba = new BackupJob(backup);
+            // string path = "/Users/bill/Desktop";
+            // joba.AddObject(new JobObject(path, "Screenshot 2021-11-21 at 5.10.05 PM.png"));
+            // joba.CreateRestorePoint();
+            // Guid first = backup.RestorePoints.Last().Id;
+            // joba.RemoveObject(joba.JobObjects.First());
+            // joba.AddObject(new JobObject(path, "Screenshot 2021-11-21 at 5.10.00 PM.png"));
+            // joba.CreateRestorePoint();
+            // Guid second = backup.RestorePoints.Last().Id;
+            //
+            // // // backup.MergeRestorePoints(first, second);
+            // JsonWrapper.WriteJson("/Users/bill/Desktop/backup/settings2.json", new List<BackupJob> { joba });
+             Backup backup = JsonWrapper.ReadJson<BackupJob>("/Users/bill/Desktop/backup/settings2.json").First().Backup;
+             Guid first = backup.RestorePoints.First().Id;
+             (backup as ExtraBackup)?.Restore(first, new CustomPathRestoreAlgorithm(new DirectoryInfo("/Users/bill/Desktop/a")));
+
+             // var a = (joba2.RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Restore(joba2.RestorePoints.Last(), joba2.Repository as IExtraRepository, joba2.Compressor as IExtraCompressor);
+
+            // ExtraBackup backup = JsonWrapper.ReadJsonBackups("/Users/bill/Desktop/backup/settings.json").First();
+            // Guid first = backup.RestorePoints.First().Id;
+            // Guid second = backup.RestorePoints.Last().Id;
+            // backup.MergeRestorePoints(first, second);
+            // JsonWrapper.WriteJson("/Users/bill/Desktop/backup/settings.json", new List<ExtraBackup> { backup });
         }
     }
 }

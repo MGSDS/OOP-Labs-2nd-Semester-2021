@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Backups.CompressionAlgorithms;
 using Backups.Entities;
 using Backups.Repositories;
@@ -14,7 +13,7 @@ namespace Backups.CreationalAlgorithms
             if (objects == null) throw new ArgumentNullException(nameof(objects));
             if (repository == null) throw new ArgumentNullException(nameof(repository));
             var id = Guid.NewGuid();
-            List<Storage> storages = objects.Select(jobObject => repository.CreateStorage(new List<JobObject> { jobObject }, compressor, id.ToString())).ToList();
+            List<Storage> storages = objects.ConvertAll(jobObject => repository.CreateStorage(new List<JobObject> { jobObject }, compressor, id.ToString()));
             return new RestorePoint(storages, DateTime.Now, id, id.ToString());
         }
     }

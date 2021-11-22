@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using Backups.CreationalAlgorithms;
 using Backups.Entities;
 using BackupsExtra.CompressionAlgorithms;
+using BackupsExtra.Entities;
 using BackupsExtra.Repository;
+using File = BackupsExtra.Entities.File;
 
 namespace BackupsExtra.CreationalAlgorithms
 {
@@ -52,6 +55,23 @@ namespace BackupsExtra.CreationalAlgorithms
             {
                 target.Storages.Remove(deletedStorage);
             }
+        }
+
+        public IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraRepository repository, IExtraCompressor compressor) // TODO: LINQ
+        {
+            var restoreItems = new List<RestoreItem>();
+            foreach (Storage targetStorage in target.Storages)
+            {
+                IReadOnlyList<File> files = compressor.Decompress(targetStorage, repository);
+                foreach (JobObject targetStorageJobObject in targetStorage.JobObjects)
+                {
+                    File file = files.FirstOrDefault(x => x.Name == targetStorageJobObject.Name)
+                                ?? throw new DataException($"File with name {targetStorageJobObject.Name} in storage");
+                    restoreItems.Add(new RestoreItem(file, targetStorageJobObject));
+                }
+            }
+
+            return restoreItems;
         }
     }
 }

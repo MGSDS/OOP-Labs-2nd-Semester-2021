@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Backups.CompressionAlgorithms;
+using Backups.Entities;
+using BackupsExtra.Repository;
+using File = BackupsExtra.Entities.File;
 
 namespace BackupsExtra.CompressionAlgorithms
 {
@@ -23,6 +27,25 @@ namespace BackupsExtra.CompressionAlgorithms
                 using var streamWriter = new StreamWriter(fileStream);
                 streamWriter.Write(entry.Open());
             }
+        }
+
+        public IReadOnlyList<File> Decompress(Storage storage, IExtraRepository repository)
+        {
+            if (storage == null) throw new ArgumentNullException(nameof(storage));
+            if (repository == null) throw new ArgumentNullException(nameof(repository));
+            using var stream = new MemoryStream();
+            repository.Read(storage, stream);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
+            var files = new List<File>();
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                using var entryStream = new MemoryStream();
+                entry.Open().CopyTo(entryStream);
+                var file = new File(entryStream, entry.Name);
+                files.Add(file);
+            }
+
+            return files;
         }
     }
 }
