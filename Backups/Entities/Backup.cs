@@ -9,12 +9,20 @@ namespace Backups.Entities
     public class Backup
     {
         private readonly List<RestorePoint> _restorePoints;
-        public Backup(IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm, ICompressor compressor, IRepository repository)
-        : this(restorePointCreationalAlgorithm, compressor, repository, new List<RestorePoint>())
+
+        public Backup(
+            IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm,
+            ICompressor compressor,
+            IRepository repository)
+            : this(restorePointCreationalAlgorithm, compressor, repository, new List<RestorePoint>())
         {
         }
 
-        protected internal Backup(IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm, ICompressor compressor, IRepository repository, IReadOnlyList<RestorePoint> restorePoints)
+        protected internal Backup(
+            IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm,
+            ICompressor compressor,
+            IRepository repository,
+            IReadOnlyList<RestorePoint> restorePoints)
         {
             RestorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
             Compressor = compressor;
@@ -39,5 +47,7 @@ namespace Backups.Entities
             if (restorePoint == null) throw new ArgumentNullException(nameof(restorePoint));
             _restorePoints.Remove(restorePoint);
         }
+
+        protected internal List<RestorePoint> GetRestorePoints() => _restorePoints;
     }
 }

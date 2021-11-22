@@ -31,7 +31,7 @@ namespace Backups.Entities
 
         public void RemoveObject(JobObject jobObject) => _jobObjects.Remove(jobObject);
 
-        public void CreateRestorePoint()
+        public virtual void CreateRestorePoint()
         {
             Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.Repository, Backup.Compressor));
         }

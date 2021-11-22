@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Backups.Entities;
+using BackupsExtra.ClearAlgorithms;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Repository;
@@ -17,15 +18,24 @@ namespace BackupsExtra.Entities
             IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
             IExtraCompressor compressor,
             IExtraRepository repository,
-            List<RestorePoint> restorePoints)
+            List<RestorePoint> restorePoints,
+            IClearAlgorithm clearAlgorithm)
             : base(restorePointCreationalAlgorithm, compressor, repository, restorePoints)
         {
+            ClearAlgorithm = clearAlgorithm;
         }
 
-        public ExtraBackup(IRestorePointManageAlgorithm restorePointCreationalAlgorithm, IExtraCompressor compressor, IExtraRepository repository)
+        public ExtraBackup(
+            IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
+            IExtraCompressor compressor,
+            IExtraRepository repository,
+            IClearAlgorithm clearAlgorithm)
             : base(restorePointCreationalAlgorithm, compressor, repository)
         {
+            ClearAlgorithm = clearAlgorithm;
         }
+
+        public IClearAlgorithm ClearAlgorithm { get; }
 
         public void MergeRestorePoints(Guid first, Guid second)
         {
@@ -63,6 +73,11 @@ namespace BackupsExtra.Entities
                 RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
                 Repository as IExtraRepository,
                 Compressor as IExtraCompressor);
+        }
+
+        public void Clear()
+        {
+            ClearAlgorithm.Clear(RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm, Repository as IExtraRepository, GetRestorePoints());
         }
     }
 }
