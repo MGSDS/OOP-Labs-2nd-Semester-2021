@@ -22,14 +22,14 @@ namespace Backups.Entities
         public Backup Backup { get; }
         public IReadOnlyList<JobObject> JobObjects => _jobObjects.AsReadOnly();
 
-        public void AddObject(JobObject jobObject)
+        public virtual void AddObject(JobObject jobObject)
         {
             if (JobObjects.Any(obj => obj.Name == jobObject.Name))
                 throw new ArgumentException("Backup not contain files with similar names");
             _jobObjects.Add(jobObject);
         }
 
-        public void RemoveObject(JobObject jobObject) => _jobObjects.Remove(jobObject);
+        public virtual void RemoveObject(JobObject jobObject) => _jobObjects.Remove(jobObject);
 
         public virtual void CreateRestorePoint()
         {

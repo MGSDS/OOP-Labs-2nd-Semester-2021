@@ -5,6 +5,7 @@ using Backups.Entities;
 using BackupsExtra.ClearAlgorithms;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
+using BackupsExtra.Logging;
 using BackupsExtra.Repository;
 using BackupsExtra.RestoreAlgorithm;
 using Newtonsoft.Json;
@@ -13,18 +14,6 @@ namespace BackupsExtra.Entities
 {
     public class ExtraBackup : Backup
     {
-        [JsonConstructor]
-        public ExtraBackup(
-            IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
-            IExtraCompressor compressor,
-            IExtraRepository repository,
-            List<RestorePoint> restorePoints,
-            IClearAlgorithm clearAlgorithm)
-            : base(restorePointCreationalAlgorithm, compressor, repository, restorePoints)
-        {
-            ClearAlgorithm = clearAlgorithm;
-        }
-
         public ExtraBackup(
             IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
             IExtraCompressor compressor,
@@ -32,52 +21,113 @@ namespace BackupsExtra.Entities
             IClearAlgorithm clearAlgorithm)
             : base(restorePointCreationalAlgorithm, compressor, repository)
         {
+            if (!LoggerSingletone.IsInitialized)
+                throw new InvalidOperationException("LoggerSingletone is required to be initializer");
+            ClearAlgorithm = clearAlgorithm;
+            Id = Guid.NewGuid();
+            LoggerSingletone.GetInstance().Write(new LoggerMessage($"Extra Backup created with id {Id}"));
+        }
+
+        [JsonConstructor]
+        private ExtraBackup(
+            IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
+            IExtraCompressor compressor,
+            IExtraRepository repository,
+            List<RestorePoint> restorePoints,
+            IClearAlgorithm clearAlgorithm,
+            Guid id)
+            : base(restorePointCreationalAlgorithm, compressor, repository, restorePoints)
+        {
+            if (!LoggerSingletone.IsInitialized)
+                throw new InvalidOperationException("LoggerSingletone is required to be initializer");
+            Id = id;
             ClearAlgorithm = clearAlgorithm;
         }
 
         public IClearAlgorithm ClearAlgorithm { get; }
+        public Guid Id { get; }
 
         public void MergeRestorePoints(Guid first, Guid second)
         {
-            RestorePoint firstRestorePoint = RestorePoints.FirstOrDefault(x => x.Id == first)
-                                             ?? throw new ArgumentException($"Restore point with id {first} not found");
-            RestorePoint secondRestorePoint = RestorePoints.FirstOrDefault(x => x.Id == second)
-                                              ?? throw new ArgumentException($"Restore point with id {second} not found");
-            if ((secondRestorePoint.BackupTime - firstRestorePoint.BackupTime).TotalMilliseconds > 0)
+            try
             {
-                (secondRestorePoint, firstRestorePoint) = (firstRestorePoint, secondRestorePoint);
-            }
+                RestorePoint firstRestorePoint = RestorePoints.FirstOrDefault(x => x.Id == first)
+                                                 ?? throw new ArgumentException($"Restore point with id {first} not found");
+                RestorePoint secondRestorePoint = RestorePoints.FirstOrDefault(x => x.Id == second)
+                                                  ?? throw new ArgumentException($"Restore point with id {second} not found");
+                if ((secondRestorePoint.BackupTime - firstRestorePoint.BackupTime).TotalMilliseconds > 0)
+                {
+                    (secondRestorePoint, firstRestorePoint) = (firstRestorePoint, secondRestorePoint);
+                }
 
-            (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Merge(
-                secondRestorePoint,
-                firstRestorePoint,
-                Repository as IExtraRepository,
-                Compressor as IExtraCompressor);
-            Remove(secondRestorePoint);
+                (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Merge(
+                    secondRestorePoint,
+                    firstRestorePoint,
+                    Repository as IExtraRepository,
+                    Compressor as IExtraCompressor);
+                LoggerSingletone.GetInstance().Write(new LoggerMessage($"RestorePoints {first} {second} successfully merged"));
+                Remove(secondRestorePoint);
+            }
+            catch (Exception e)
+            {
+                LoggerSingletone.GetInstance().Write(new LoggerMessage(e));
+                throw;
+            }
         }
 
         public void DeleteRestorePoint(Guid id)
         {
-            RestorePoint restorePoint = RestorePoints.FirstOrDefault(x => x.Id == id)
-                                          ?? throw new ArgumentException($"Restore point with id {id} not found");
-            (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Delete(restorePoint, Repository as IExtraRepository);
-            Remove(restorePoint);
+            try
+            {
+                RestorePoint restorePoint = RestorePoints.FirstOrDefault(x => x.Id == id)
+                                            ?? throw new ArgumentException($"Restore point with id {id} not found");
+                (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Delete(restorePoint, Repository as IExtraRepository);
+                LoggerSingletone.GetInstance().Write(new LoggerMessage($"RestorePoint {id} successfully deleted"));
+                Remove(restorePoint);
+            }
+            catch (Exception e)
+            {
+                LoggerSingletone.GetInstance().Write(new LoggerMessage(e));
+                throw;
+            }
         }
 
         public void Restore(Guid pointId, IRestoreAlgorithm restoreAlgorithm)
         {
-            RestorePoint restorePoint = RestorePoints.FirstOrDefault(x => x.Id == pointId)
-                                        ?? throw new ArgumentException($"Restore point with id {pointId} not found");
-            restoreAlgorithm.Restore(
-                restorePoint,
-                RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
-                Repository as IExtraRepository,
-                Compressor as IExtraCompressor);
+            try
+            {
+                RestorePoint restorePoint = RestorePoints.FirstOrDefault(x => x.Id == pointId)
+                                            ?? throw new ArgumentException(
+                                                $"Restore point with id {pointId} not found");
+                restoreAlgorithm.Restore(
+                    restorePoint,
+                    RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
+                    Repository as IExtraRepository,
+                    Compressor as IExtraCompressor);
+                LoggerSingletone.GetInstance().Write(
+                    new LoggerMessage($"Restore point {pointId} successfully restored using {restoreAlgorithm.GetType().Name}"));
+            }
+            catch (Exception e)
+            {
+                LoggerSingletone.GetInstance().Write(new LoggerMessage(e));
+                throw;
+            }
         }
 
         public void Clear()
         {
-            ClearAlgorithm.Clear(RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm, Repository as IExtraRepository, GetRestorePoints());
+            try
+            {
+                ClearAlgorithm.Clear(
+                    RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
+                    Repository as IExtraRepository,
+                    GetRestorePoints());
+            }
+            catch (Exception e)
+            {
+                LoggerSingletone.GetInstance().Write(new LoggerMessage(e));
+                throw;
+            }
         }
     }
 }

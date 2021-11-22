@@ -14,7 +14,11 @@ namespace Backups.CompressionAlgorithms
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             using var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true);
             foreach (JobObject obj in objects)
+            {
+                if (!File.Exists(obj.FullPath))
+                    throw new InvalidOperationException($"File {obj.FullPath} does not exists");
                 archive.CreateEntryFromFile(Path.Combine(obj.Path, obj.Name), obj.Name, CompressionLevel.Optimal);
+            }
         }
     }
 }

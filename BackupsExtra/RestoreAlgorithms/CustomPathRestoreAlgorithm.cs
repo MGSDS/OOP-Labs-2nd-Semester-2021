@@ -4,6 +4,7 @@ using Backups.Entities;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Entities;
+using BackupsExtra.Logging;
 using BackupsExtra.Repository;
 
 namespace BackupsExtra.RestoreAlgorithm
@@ -27,7 +28,6 @@ namespace BackupsExtra.RestoreAlgorithm
 
             foreach (RestoreItem restoreItem in files)
             {
-                // TODO: file not restored logger
                 string path = Path.Combine(Directory.FullName, restoreItem.JobObject.Name);
                 if (!System.IO.File.Exists(path))
                 {
@@ -35,9 +35,11 @@ namespace BackupsExtra.RestoreAlgorithm
                     using MemoryStream fileStream = restoreItem.File.Stream;
                     fileStream.Position = 0;
                     fileStream.CopyTo(stream);
+                    LoggerSingletone.GetInstance().Write(new LoggerMessage($"File {path} successfully restored"));
                 }
 
                 restoreItem.Dispose();
+                LoggerSingletone.GetInstance().Write(new LoggerMessage($"File {path} already exists, File {restoreItem.JobObject.FullPath} wont be restores", messageType: MessageType.Warning));
             }
         }
     }

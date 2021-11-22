@@ -57,7 +57,7 @@ namespace BackupsExtra.CreationalAlgorithms
             }
         }
 
-        public IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraRepository repository, IExtraCompressor compressor) // TODO: LINQ
+        public IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraRepository repository, IExtraCompressor compressor)
         {
             var restoreItems = new List<RestoreItem>();
             foreach (Storage targetStorage in target.Storages)

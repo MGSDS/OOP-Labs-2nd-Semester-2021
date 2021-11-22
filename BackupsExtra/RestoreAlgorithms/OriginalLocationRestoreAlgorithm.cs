@@ -6,7 +6,9 @@ using Backups.Entities;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Entities;
+using BackupsExtra.Logging;
 using BackupsExtra.Repository;
+using File = BackupsExtra.Entities.File;
 
 namespace BackupsExtra.RestoreAlgorithm
 {
@@ -33,13 +35,15 @@ namespace BackupsExtra.RestoreAlgorithm
 
             foreach (RestoreItem restoreItem in files)
             {
-                // TODO: file rewrite logger
+                if (System.IO.File.Exists(restoreItem.JobObject.FullPath))
+                    LoggerSingletone.GetInstance().Write(new LoggerMessage($"File {restoreItem.JobObject.FullPath} will be rewrited", messageType: MessageType.Warning));
                 using FileStream stream = System.IO.File.OpenWrite(restoreItem.JobObject.FullPath);
                 stream.SetLength(0);
                 stream.Position = 0;
                 using MemoryStream fileStream = restoreItem.File.Stream;
                 fileStream.Position = 0;
                 fileStream.CopyTo(stream);
+                LoggerSingletone.GetInstance().Write(new LoggerMessage($"File {restoreItem.JobObject.FullPath} successfully restored"));
                 restoreItem.Dispose();
             }
         }
