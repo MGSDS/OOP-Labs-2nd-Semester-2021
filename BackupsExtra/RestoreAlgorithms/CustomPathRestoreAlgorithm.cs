@@ -21,10 +21,10 @@ namespace BackupsExtra.RestoreAlgorithm
         public void Restore(
             RestorePoint restorePoint,
             IRestorePointManageAlgorithm restorePointManageAlgorithm,
-            IExtraRepository repository,
+            IExtraBackupDestinationRepository backupDestinationRepository,
             IExtraCompressor compressor)
         {
-            IReadOnlyList<RestoreItem> files = restorePointManageAlgorithm.Restore(restorePoint, repository, compressor);
+            IReadOnlyList<RestoreItem> files = restorePointManageAlgorithm.Restore(restorePoint, backupDestinationRepository, compressor);
 
             foreach (RestoreItem restoreItem in files)
             {

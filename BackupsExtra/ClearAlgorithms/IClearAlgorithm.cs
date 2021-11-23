@@ -8,6 +8,6 @@ namespace BackupsExtra.ClearAlgorithms
 {
     public interface IClearAlgorithm
     {
-        void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraRepository repository, List<RestorePoint> restorePoints);
+        void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraBackupDestinationRepository backupDestinationRepository, List<RestorePoint> restorePoints);
     }
 }

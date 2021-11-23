@@ -18,24 +18,24 @@ namespace BackupsExtra.ClearAlgorithms.Proxies
         public IClearAlgorithm Algorithm { get; }
         public TimeSpan MaxAge { get; }
 
-        public void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraRepository repository, List<RestorePoint> restorePoints)
+        public void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraBackupDestinationRepository backupDestinationRepository, List<RestorePoint> restorePoints)
         {
             if (restorePoints.Count <=
                 restorePoints.Count(restorePoint => DateTime.Now - restorePoint.BackupTime > MaxAge))
             {
-                Algorithm.Clear(restorePointManageAlgorithm, repository, restorePoints);
+                Algorithm.Clear(restorePointManageAlgorithm, backupDestinationRepository, restorePoints);
                 throw new InvalidOperationException($"Can not run DateClearAlgorithmProxy with MaxAge {MaxAge}. RestorePoints can not be empty");
             }
 
             foreach (RestorePoint restorePoint in restorePoints.Where(restorePoint =>
                     DateTime.Now - restorePoint.BackupTime > MaxAge))
             {
-                restorePointManageAlgorithm.Delete(restorePoint, repository);
+                restorePointManageAlgorithm.Delete(restorePoint, backupDestinationRepository);
             }
 
             restorePoints.RemoveAll(restorePoint =>
                 DateTime.Now - restorePoint.BackupTime > MaxAge);
-            Algorithm.Clear(restorePointManageAlgorithm, repository, restorePoints);
+            Algorithm.Clear(restorePointManageAlgorithm, backupDestinationRepository, restorePoints);
         }
     }
 }

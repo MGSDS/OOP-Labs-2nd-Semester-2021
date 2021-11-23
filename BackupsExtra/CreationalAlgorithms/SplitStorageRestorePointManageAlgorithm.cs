@@ -7,40 +7,40 @@ using Backups.Entities;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.Entities;
 using BackupsExtra.Repository;
-using File = BackupsExtra.Entities.File;
+using File = Backups.Entities.File;
 
 namespace BackupsExtra.CreationalAlgorithms
 {
     public class SplitStorageRestorePointManageAlgorithm : SplitStorageRestorePointCreationalAlgorithm, IRestorePointManageAlgorithm
     {
-        public void Merge(RestorePoint source, RestorePoint destination, IExtraRepository repository, IExtraCompressor compressor)
+        public void Merge(RestorePoint source, RestorePoint destination, IExtraBackupDestinationRepository backupDestinationRepository, IExtraCompressor compressor)
         {
             foreach (Storage sourceStorage in source.Storages.Where(sourceStorage
                 => destination.Storages.All(x => x.JobObjects.First<JobObject>().FullPath != sourceStorage.JobObjects.First().FullPath)))
             {
                 using var memoryStream = new MemoryStream();
-                repository.Read(sourceStorage, memoryStream);
+                backupDestinationRepository.Read(sourceStorage, memoryStream);
                 var storage = new Storage(sourceStorage.Name, destination.Path, sourceStorage.Id, sourceStorage.JobObjects);
-                repository.Write(storage, memoryStream);
+                backupDestinationRepository.Write(storage, memoryStream);
                 destination.Storages.Add(storage);
-                repository.Delete(sourceStorage);
+                backupDestinationRepository.Delete(sourceStorage);
             }
         }
 
-        public void Delete(RestorePoint target, IExtraRepository repository)
+        public void Delete(RestorePoint target, IExtraBackupDestinationRepository backupDestinationRepository)
         {
             foreach (Storage targetStorage in target.Storages)
             {
-                repository.Delete(targetStorage);
+                backupDestinationRepository.Delete(targetStorage);
             }
         }
 
-        public IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraRepository repository, IExtraCompressor compressor)
+        public IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraBackupDestinationRepository backupDestinationRepository, IExtraCompressor compressor)
         {
             var restoreItems = new List<RestoreItem>();
             foreach (Storage targetStorage in target.Storages)
             {
-                IReadOnlyList<File> files = compressor.Decompress(targetStorage, repository);
+                IReadOnlyList<File> files = compressor.Decompress(targetStorage, backupDestinationRepository);
                 foreach (JobObject targetStorageJobObject in targetStorage.JobObjects)
                 {
                     File file = files.FirstOrDefault(x => x.Name == targetStorageJobObject.Name)

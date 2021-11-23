@@ -8,19 +8,19 @@ using BackupsExtra.CreationalAlgorithms;
 using BackupsExtra.Entities;
 using BackupsExtra.Logging;
 using BackupsExtra.Repository;
-using File = BackupsExtra.Entities.File;
+using BackupsExtra.RestoreAlgorithm;
 
-namespace BackupsExtra.RestoreAlgorithm
+namespace BackupsExtra.RestoreAlgorithms
 {
     public class OriginalLocationRestoreAlgorithm : IRestoreAlgorithm
     {
         public void Restore(
             RestorePoint restorePoint,
             IRestorePointManageAlgorithm restorePointManageAlgorithm,
-            IExtraRepository repository,
+            IExtraBackupDestinationRepository backupDestinationRepository,
             IExtraCompressor compressor)
         {
-            IReadOnlyList<RestoreItem> files = restorePointManageAlgorithm.Restore(restorePoint, repository, compressor);
+            IReadOnlyList<RestoreItem> files = restorePointManageAlgorithm.Restore(restorePoint, backupDestinationRepository, compressor);
             foreach (RestoreItem restoreItem in files)
             {
                 try

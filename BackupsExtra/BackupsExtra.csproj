@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BackupsExtraTcpClient\BackupsExtraTcpClient.csproj" />
     <ProjectReference Include="..\Backups\Backups.csproj" />
   </ItemGroup>
 

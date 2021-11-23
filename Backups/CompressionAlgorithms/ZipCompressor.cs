@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using Backups.Entities;
+using File = Backups.Entities.File;
 
 namespace Backups.CompressionAlgorithms
 {
     public class ZipCompressor : ICompressor
     {
-        public void Compress(IReadOnlyList<JobObject> objects, Stream stream)
+        public void Compress(IReadOnlyList<File> files, Stream stream)
         {
-            if (objects == null) throw new ArgumentNullException(nameof(objects));
+            if (files == null) throw new ArgumentNullException(nameof(files));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             using var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true);
-            foreach (JobObject obj in objects)
+            foreach (File file in files)
             {
-                if (!File.Exists(obj.FullPath))
-                    throw new InvalidOperationException($"File {obj.FullPath} does not exists");
-                archive.CreateEntryFromFile(Path.Combine(obj.Path, obj.Name), obj.Name, CompressionLevel.Optimal);
+                ZipArchiveEntry entry = archive.CreateEntry(file.Name);
+                using Stream fileStream = entry.Open();
+                using var streamWriter = new StreamWriter(fileStream);
+                streamWriter.Write(file.Stream);
             }
         }
     }

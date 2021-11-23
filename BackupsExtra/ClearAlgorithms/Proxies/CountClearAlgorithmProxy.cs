@@ -19,11 +19,11 @@ namespace BackupsExtra.ClearAlgorithms.Proxies
 
         public IClearAlgorithm Algorithm { get; }
         public ushort MaxCount { get; }
-        public void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraRepository repository, List<RestorePoint> restorePoints)
+        public void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraBackupDestinationRepository backupDestinationRepository, List<RestorePoint> restorePoints)
         {
             if (restorePoints.Count() <= MaxCount)
             {
-                Algorithm.Clear(restorePointManageAlgorithm, repository, restorePoints);
+                Algorithm.Clear(restorePointManageAlgorithm, backupDestinationRepository, restorePoints);
                 return;
             }
 
@@ -31,11 +31,11 @@ namespace BackupsExtra.ClearAlgorithms.Proxies
             int toBeDeleted = restorePoints.Count - MaxCount;
             for (int i = 0; i < toBeDeleted; i++)
             {
-                restorePointManageAlgorithm.Delete(restorePoints.First(), repository);
+                restorePointManageAlgorithm.Delete(restorePoints.First(), backupDestinationRepository);
                 restorePoints.RemoveAt(0);
             }
 
-            Algorithm.Clear(restorePointManageAlgorithm, repository, restorePoints);
+            Algorithm.Clear(restorePointManageAlgorithm, backupDestinationRepository, restorePoints);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace BackupsExtra.ClearAlgorithms
 {
     public class BaseClearAlgorithm : IClearAlgorithm
     {
-        public void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraRepository repository, List<RestorePoint> restorePoints)
+        public void Clear(IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraBackupDestinationRepository backupDestinationRepository, List<RestorePoint> restorePoints)
         {
         }
     }

@@ -13,28 +13,32 @@ namespace Backups.Entities
         public Backup(
             IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm,
             ICompressor compressor,
+            IBackupDestinationRepository backupDestinationRepository,
             IRepository repository)
-            : this(restorePointCreationalAlgorithm, compressor, repository, new List<RestorePoint>())
+            : this(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, new List<RestorePoint>(), repository)
         {
         }
 
         protected internal Backup(
             IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm,
             ICompressor compressor,
-            IRepository repository,
-            IReadOnlyList<RestorePoint> restorePoints)
+            IBackupDestinationRepository backupDestinationRepository,
+            IReadOnlyList<RestorePoint> restorePoints,
+            IRepository repository)
         {
             RestorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
             Compressor = compressor;
-            Repository = repository;
+            BackupDestinationRepository = backupDestinationRepository;
             _restorePoints = restorePoints as List<RestorePoint>;
+            Repository = repository;
         }
 
+        public IRepository Repository { get; }
         public IReadOnlyList<RestorePoint> RestorePoints => _restorePoints;
 
         public IRestorePointCreationalAlgorithm RestorePointCreationalAlgorithm { get; }
         public ICompressor Compressor { get; }
-        public IRepository Repository { get; }
+        public IBackupDestinationRepository BackupDestinationRepository { get; }
 
         public void Add(RestorePoint restorePoint)
         {

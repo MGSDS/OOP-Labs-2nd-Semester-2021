@@ -7,6 +7,6 @@ namespace Backups.CreationalAlgorithms
 {
     public interface IRestorePointCreationalAlgorithm
     {
-        RestorePoint Run(List<JobObject> objects, IRepository repository, ICompressor compressor);
+        RestorePoint Run(List<JobObject> objects, IBackupDestinationRepository backupDestinationRepository, IRepository repository, ICompressor compressor);
     }
 }

@@ -9,8 +9,8 @@ namespace BackupsExtra.CreationalAlgorithms
 {
     public interface IRestorePointManageAlgorithm : IRestorePointCreationalAlgorithm
     {
-        void Merge(RestorePoint source, RestorePoint destination, IExtraRepository repository, IExtraCompressor compressor);
-        void Delete(RestorePoint target, IExtraRepository repository);
-        IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraRepository repository, IExtraCompressor compressor);
+        void Merge(RestorePoint source, RestorePoint destination, IExtraBackupDestinationRepository backupDestinationRepository, IExtraCompressor compressor);
+        void Delete(RestorePoint target, IExtraBackupDestinationRepository backupDestinationRepository);
+        IReadOnlyList<RestoreItem> Restore(RestorePoint target, IExtraBackupDestinationRepository backupDestinationRepository, IExtraCompressor compressor);
     }
 }

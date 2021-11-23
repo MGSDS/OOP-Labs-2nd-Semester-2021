@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Backups.Entities;
+using Backups.Repositories;
 using BackupsExtra.ClearAlgorithms;
 using BackupsExtra.CompressionAlgorithms;
 using BackupsExtra.CreationalAlgorithms;
@@ -17,9 +18,10 @@ namespace BackupsExtra.Entities
         public ExtraBackup(
             IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
             IExtraCompressor compressor,
-            IExtraRepository repository,
-            IClearAlgorithm clearAlgorithm)
-            : base(restorePointCreationalAlgorithm, compressor, repository)
+            IExtraBackupDestinationRepository backupDestinationRepository,
+            IClearAlgorithm clearAlgorithm,
+            IRepository repository)
+            : base(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, repository)
         {
             if (!LoggerSingletone.IsInitialized)
                 throw new InvalidOperationException("LoggerSingletone is required to be initializer");
@@ -32,14 +34,15 @@ namespace BackupsExtra.Entities
         private ExtraBackup(
             IRestorePointManageAlgorithm restorePointCreationalAlgorithm,
             IExtraCompressor compressor,
-            IExtraRepository repository,
+            IExtraBackupDestinationRepository backupDestinationRepository,
             List<RestorePoint> restorePoints,
             IClearAlgorithm clearAlgorithm,
+            IRepository repository,
             Guid id)
-            : base(restorePointCreationalAlgorithm, compressor, repository, restorePoints)
+            : base(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, restorePoints, repository)
         {
             if (!LoggerSingletone.IsInitialized)
-                throw new InvalidOperationException("LoggerSingletone is required to be initializer");
+                throw new InvalidOperationException("LoggerSingleton is required to be initializer");
             Id = id;
             ClearAlgorithm = clearAlgorithm;
         }
@@ -63,7 +66,7 @@ namespace BackupsExtra.Entities
                 (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Merge(
                     secondRestorePoint,
                     firstRestorePoint,
-                    Repository as IExtraRepository,
+                    BackupDestinationRepository as IExtraBackupDestinationRepository,
                     Compressor as IExtraCompressor);
                 LoggerSingletone.GetInstance().Write(new LoggerMessage($"RestorePoints {first} {second} successfully merged"));
                 Remove(secondRestorePoint);
@@ -81,7 +84,7 @@ namespace BackupsExtra.Entities
             {
                 RestorePoint restorePoint = RestorePoints.FirstOrDefault(x => x.Id == id)
                                             ?? throw new ArgumentException($"Restore point with id {id} not found");
-                (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Delete(restorePoint, Repository as IExtraRepository);
+                (RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm)?.Delete(restorePoint, BackupDestinationRepository as IExtraBackupDestinationRepository);
                 LoggerSingletone.GetInstance().Write(new LoggerMessage($"RestorePoint {id} successfully deleted"));
                 Remove(restorePoint);
             }
@@ -102,7 +105,7 @@ namespace BackupsExtra.Entities
                 restoreAlgorithm.Restore(
                     restorePoint,
                     RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
-                    Repository as IExtraRepository,
+                    BackupDestinationRepository as IExtraBackupDestinationRepository,
                     Compressor as IExtraCompressor);
                 LoggerSingletone.GetInstance().Write(
                     new LoggerMessage($"Restore point {pointId} successfully restored using {restoreAlgorithm.GetType().Name}"));
@@ -120,7 +123,7 @@ namespace BackupsExtra.Entities
             {
                 ClearAlgorithm.Clear(
                     RestorePointCreationalAlgorithm as IRestorePointManageAlgorithm,
-                    Repository as IExtraRepository,
+                    BackupDestinationRepository as IExtraBackupDestinationRepository,
                     GetRestorePoints());
             }
             catch (Exception e)

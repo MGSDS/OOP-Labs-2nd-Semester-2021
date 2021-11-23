@@ -6,7 +6,7 @@ using System.Linq;
 using Backups.CompressionAlgorithms;
 using Backups.Entities;
 using BackupsExtra.Repository;
-using File = BackupsExtra.Entities.File;
+using File = Backups.Entities.File;
 
 namespace BackupsExtra.CompressionAlgorithms
 {
@@ -29,12 +29,12 @@ namespace BackupsExtra.CompressionAlgorithms
             }
         }
 
-        public IReadOnlyList<File> Decompress(Storage storage, IExtraRepository repository)
+        public IReadOnlyList<File> Decompress(Storage storage, IExtraBackupDestinationRepository backupDestinationRepository)
         {
             if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (repository == null) throw new ArgumentNullException(nameof(repository));
+            if (backupDestinationRepository == null) throw new ArgumentNullException(nameof(backupDestinationRepository));
             using var stream = new MemoryStream();
-            repository.Read(storage, stream);
+            backupDestinationRepository.Read(storage, stream);
             using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
             var files = new List<File>();
             foreach (ZipArchiveEntry entry in archive.Entries)

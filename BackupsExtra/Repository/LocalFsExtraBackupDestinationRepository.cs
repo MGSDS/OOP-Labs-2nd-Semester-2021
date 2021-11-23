@@ -2,13 +2,14 @@ using System.IO;
 using Backups.Entities;
 using Backups.Repositories;
 using Newtonsoft.Json;
+using File = System.IO.File;
 
 namespace BackupsExtra.Repository
 {
-    public class LocalFsExtraRepository : LocalFsRepository, IExtraRepository
+    public class LocalFsExtraBackupDestinationRepository : LocalFsBackupDestinationRepository, IExtraBackupDestinationRepository
     {
         [JsonConstructor]
-        public LocalFsExtraRepository(string repositoryPath)
+        public LocalFsExtraBackupDestinationRepository(string repositoryPath)
             : base(repositoryPath)
         {
         }

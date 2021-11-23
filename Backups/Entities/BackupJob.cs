@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backups.Repositories;
 using Newtonsoft.Json;
 
 namespace Backups.Entities
@@ -33,7 +34,7 @@ namespace Backups.Entities
 
         public virtual void CreateRestorePoint()
         {
-            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.Repository, Backup.Compressor));
+            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.BackupDestinationRepository, Backup.Repository, Backup.Compressor));
         }
     }
 }

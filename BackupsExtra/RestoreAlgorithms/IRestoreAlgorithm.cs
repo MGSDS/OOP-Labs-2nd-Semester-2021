@@ -7,6 +7,6 @@ namespace BackupsExtra.RestoreAlgorithm
 {
     public interface IRestoreAlgorithm
     {
-        void Restore(RestorePoint restorePoint, IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraRepository repository, IExtraCompressor compressor);
+        void Restore(RestorePoint restorePoint, IRestorePointManageAlgorithm restorePointManageAlgorithm, IExtraBackupDestinationRepository backupDestinationRepository, IExtraCompressor compressor);
     }
 }
