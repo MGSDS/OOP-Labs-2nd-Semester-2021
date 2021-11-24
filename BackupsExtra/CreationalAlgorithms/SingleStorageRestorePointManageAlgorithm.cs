@@ -18,9 +18,9 @@ namespace BackupsExtra.CreationalAlgorithms
         {
             if (source.Storages.Count != 1 || destination.Storages.Count != 1)
                 throw new InvalidOperationException("Merge is only supported for single storage restore points");
-            using Stream sourceStream = new MemoryStream();
+            using var sourceStream = new MemoryStream();
             backupDestinationRepository.Read(destination.Storages[0], sourceStream);
-            using Stream destinationStream = new MemoryStream();
+            using var destinationStream = new MemoryStream();
             backupDestinationRepository.Read(source.Storages[0], destinationStream);
             compressor.Merge(destinationStream, sourceStream);
             backupDestinationRepository.Write(destination.Storages[0], destinationStream);

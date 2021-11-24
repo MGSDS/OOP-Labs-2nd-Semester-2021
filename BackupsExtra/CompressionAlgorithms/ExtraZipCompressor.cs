@@ -23,9 +23,11 @@ namespace BackupsExtra.CompressionAlgorithms
                 if (archive.Entries.Any(e => e.FullName == entry.FullName)) continue;
 
                 ZipArchiveEntry file = archive.CreateEntry(entry.FullName);
-                using Stream fileStream = file.Open();
-                using var streamWriter = new StreamWriter(fileStream);
-                streamWriter.Write(entry.Open());
+                using Stream destinationStream = file.Open();
+                using Stream sourceStream = entry.Open();
+                using MemoryStream buffer = new MemoryStream();
+                sourceStream.CopyTo(buffer);
+                destinationStream.Write(buffer.ToArray(), 0, buffer.ToArray().Length);
             }
         }
 

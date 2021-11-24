@@ -18,8 +18,7 @@ namespace Backups.CompressionAlgorithms
             {
                 ZipArchiveEntry entry = archive.CreateEntry(file.Name);
                 using Stream fileStream = entry.Open();
-                using var streamWriter = new StreamWriter(fileStream);
-                streamWriter.Write(file.Stream);
+                fileStream.Write(file.Data, 0, file.Data.Length);
             }
         }
     }
