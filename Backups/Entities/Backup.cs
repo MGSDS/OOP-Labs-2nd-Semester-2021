@@ -14,8 +14,8 @@ namespace Backups.Entities
             IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm,
             ICompressor compressor,
             IBackupDestinationRepository backupDestinationRepository,
-            IRepository repository)
-            : this(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, new List<RestorePoint>(), repository)
+            ISourceRepository sourceRepository)
+            : this(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, new List<RestorePoint>(), sourceRepository)
         {
         }
 
@@ -24,16 +24,16 @@ namespace Backups.Entities
             ICompressor compressor,
             IBackupDestinationRepository backupDestinationRepository,
             IReadOnlyList<RestorePoint> restorePoints,
-            IRepository repository)
+            ISourceRepository sourceRepository)
         {
             RestorePointCreationalAlgorithm = restorePointCreationalAlgorithm;
             Compressor = compressor;
             BackupDestinationRepository = backupDestinationRepository;
             _restorePoints = restorePoints as List<RestorePoint>;
-            Repository = repository;
+            SourceRepository = sourceRepository;
         }
 
-        public IRepository Repository { get; }
+        public ISourceRepository SourceRepository { get; }
         public IReadOnlyList<RestorePoint> RestorePoints => _restorePoints;
 
         public IRestorePointCreationalAlgorithm RestorePointCreationalAlgorithm { get; }

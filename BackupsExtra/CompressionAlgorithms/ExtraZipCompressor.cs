@@ -25,7 +25,7 @@ namespace BackupsExtra.CompressionAlgorithms
                 ZipArchiveEntry file = archive.CreateEntry(entry.FullName);
                 using Stream destinationStream = file.Open();
                 using Stream sourceStream = entry.Open();
-                using MemoryStream buffer = new MemoryStream();
+                using var buffer = new MemoryStream();
                 sourceStream.CopyTo(buffer);
                 destinationStream.Write(buffer.ToArray(), 0, buffer.ToArray().Length);
             }

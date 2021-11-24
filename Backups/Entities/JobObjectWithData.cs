@@ -6,10 +6,10 @@ namespace Backups.Entities
 {
     public class JobObjectWithData : IDisposable
     {
-        public JobObjectWithData(JobObject jobObject, IRepository repository)
+        public JobObjectWithData(JobObject jobObject, ISourceRepository sourceRepository)
         {
             JobObject = jobObject;
-            File = repository.ReadFile(jobObject.FullPath);
+            File = sourceRepository.ReadFile(jobObject.FullPath);
         }
 
         [JsonConstructor]

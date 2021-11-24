@@ -34,7 +34,7 @@ namespace Backups.Entities
 
         public virtual void CreateRestorePoint()
         {
-            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.BackupDestinationRepository, Backup.Repository, Backup.Compressor));
+            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.BackupDestinationRepository, Backup.SourceRepository, Backup.Compressor));
         }
     }
 }

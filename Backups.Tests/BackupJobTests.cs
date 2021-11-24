@@ -15,12 +15,12 @@ namespace Backups.Tests
     public class BackupJobTests
     {
         private Mock<IBackupDestinationRepository> _backupRepository;
-        private Mock<IRepository> _repository;
+        private Mock<ISourceRepository> _repository;
 
         [SetUp]
         public void SetUp()
         {
-            _repository = new Mock<IRepository>();
+            _repository = new Mock<ISourceRepository>();
             _repository.Setup(a => a.ReadFile(It.IsAny<string>())).Returns(new File(new MemoryStream(), "awesome name"));
             _backupRepository = new Mock<IBackupDestinationRepository>();
             _backupRepository.Setup(a => a.CreateStorage(It.IsAny<List<JobObjectWithData>>(), new ZipCompressor(), It.IsAny<string>()))

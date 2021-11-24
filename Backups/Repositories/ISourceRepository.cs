@@ -3,7 +3,7 @@ using File = Backups.Entities.File;
 
 namespace Backups.Repositories
 {
-    public interface IRepository
+    public interface ISourceRepository
     {
         File ReadFile(string path);
     }

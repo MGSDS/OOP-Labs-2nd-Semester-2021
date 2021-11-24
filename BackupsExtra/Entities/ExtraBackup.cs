@@ -20,8 +20,8 @@ namespace BackupsExtra.Entities
             IExtraCompressor compressor,
             IExtraBackupDestinationRepository backupDestinationRepository,
             IClearAlgorithm clearAlgorithm,
-            IRepository repository)
-            : base(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, repository)
+            ISourceRepository sourceRepository)
+            : base(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, sourceRepository)
         {
             if (!LoggerSingletone.IsInitialized)
                 throw new InvalidOperationException("LoggerSingletone is required to be initializer");
@@ -37,9 +37,9 @@ namespace BackupsExtra.Entities
             IExtraBackupDestinationRepository backupDestinationRepository,
             List<RestorePoint> restorePoints,
             IClearAlgorithm clearAlgorithm,
-            IRepository repository,
+            ISourceRepository sourceRepository,
             Guid id)
-            : base(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, restorePoints, repository)
+            : base(restorePointCreationalAlgorithm, compressor, backupDestinationRepository, restorePoints, sourceRepository)
         {
             if (!LoggerSingletone.IsInitialized)
                 throw new InvalidOperationException("LoggerSingleton is required to be initializer");

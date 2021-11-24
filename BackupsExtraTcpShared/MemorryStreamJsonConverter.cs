@@ -22,7 +22,7 @@ namespace BackupsExtraTcpShared
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            byte[]? bytes = (value as MemoryStream).ToArray();
+            byte[ ]? bytes = (value as MemoryStream).ToArray();
             serializer.Serialize(writer, bytes);
         }
     }
