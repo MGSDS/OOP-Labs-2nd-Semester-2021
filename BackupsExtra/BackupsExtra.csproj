@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EditorConfigFiles Remove="..\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\.editorconfig" />
   </ItemGroup>
 
@@ -20,6 +16,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BackupsExtraTcpClient\BackupsExtraTcpClient.csproj" />
+    <ProjectReference Include="..\Backups\Backups.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,14 +6,14 @@ using Backups.Repositories;
 
 namespace Backups
 {
-    internal class Program
+    internal static class Program
     {
         private static void Main()
         {
-            var backup = new Backup();
-            var repository = new TcpRepository(IPAddress.Parse("127.0.0.1"), 1234, new ZipCompressor());
+            var repository = new TcpBackupDestinationRepository(IPAddress.Parse("127.0.0.1"), 1234);
             var algo = new SplitStorageRestorePointCreationalAlgorithm();
-            var joba = new BackupJob(backup, repository, algo);
+            var backup = new Backup(algo, new ZipCompressor(), repository, new LocalFileSystemSourceRepository());
+            var joba = new BackupJob(backup);
             string path = "path";
             joba.AddObject(new JobObject(path, "file1"));
             joba.AddObject(new JobObject(path, "file2"));

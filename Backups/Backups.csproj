@@ -10,14 +10,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <EditorConfigFiles Remove="..\.editorconfig"/>
+        <EditorConfigFiles Remove="..\.editorconfig" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\.editorconfig"/>
+        <None Include="..\.editorconfig" />
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,7 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Backups.Client\Backups.Client.csproj"/>
+        <ProjectReference Include="..\Backups.Client\Backups.Client.csproj" />
     </ItemGroup>
 
 </Project>

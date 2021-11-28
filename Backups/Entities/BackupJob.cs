@@ -1,43 +1,40 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Backups.CreationalAlgorithms;
 using Backups.Repositories;
+using Newtonsoft.Json;
 
 namespace Backups.Entities
 {
     public class BackupJob
     {
-        private readonly IRepository _repository;
-        private readonly List<JobObject> _jobObjects;
-        private readonly IRestorePointCreationalAlgorithm _restorePointCreationalAlgorithm;
+        private List<JobObject> _jobObjects;
 
-        public BackupJob(Backup backup, IRepository repository, List<JobObject> jobObjects, IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm)
+        [JsonConstructor]
+        public BackupJob(Backup backup, List<JobObject> jobObjects)
         {
             Backup = backup ?? throw new ArgumentNullException(nameof(backup));
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _jobObjects = jobObjects ?? throw new ArgumentNullException(nameof(jobObjects));
-            _restorePointCreationalAlgorithm = restorePointCreationalAlgorithm ?? throw new ArgumentNullException(nameof(restorePointCreationalAlgorithm));
+            _jobObjects = jobObjects;
         }
 
-        public BackupJob(Backup backup, IRepository repository, IRestorePointCreationalAlgorithm restorePointCreationalAlgorithm)
-            : this(backup, repository, new List<JobObject>(), restorePointCreationalAlgorithm) { }
+        public BackupJob(Backup backup)
+            : this(backup, new List<JobObject>()) { }
 
         public Backup Backup { get; }
-        public IReadOnlyList<JobObject> JobObjects => _jobObjects;
+        public IReadOnlyList<JobObject> JobObjects => _jobObjects.AsReadOnly();
 
-        public void AddObject(JobObject jobObject)
+        public virtual void AddObject(JobObject jobObject)
         {
             if (JobObjects.Any(obj => obj.Name == jobObject.Name))
                 throw new ArgumentException("Backup not contain files with similar names");
             _jobObjects.Add(jobObject);
         }
 
-        public void RemoveObject(JobObject jobObject) => _jobObjects.Remove(jobObject);
+        public virtual void RemoveObject(JobObject jobObject) => _jobObjects.Remove(jobObject);
 
-        public void CreateRestorePoint()
+        public virtual void CreateRestorePoint()
         {
-            Backup.AddRestorePoint(_restorePointCreationalAlgorithm.Run(_jobObjects, _repository));
+            Backup.Add(Backup.RestorePointCreationalAlgorithm.Run(_jobObjects, Backup.BackupDestinationRepository, Backup.SourceRepository, Backup.Compressor));
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace Backups.Entities
 {
@@ -11,6 +12,7 @@ namespace Backups.Entities
             Path = System.IO.Path.GetDirectoryName(path);
         }
 
+        [JsonConstructor]
         public JobObject(string path, string name)
             : this(path: System.IO.Path.Combine(path, name))
         {
@@ -21,5 +23,8 @@ namespace Backups.Entities
         public string Name { get; }
 
         public string Path { get; }
+
+        [JsonIgnore]
+        public string FullPath => System.IO.Path.Combine(Path, Name);
     }
 }
